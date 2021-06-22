@@ -1,6 +1,9 @@
 # lua files compiled from fennel
 lua/
 
+# packer_compiled
+plugin/
+
 # Compiled Lua sources
 luac.out
 
