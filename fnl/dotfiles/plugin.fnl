@@ -79,13 +79,11 @@
 
   :navarasu/onedark.nvim {}
   :christianchiarulli/nvcode-color-schemes.vim {}
-
   :rktjmp/lush.nvim {}
   :svitax/gruvbox.nvim {}
-
   :nvim-treesitter/nvim-treesitter {:run ":TSUpdate" :mod :treesitter}
   :kyazdani42/nvim-web-devicons {}
   :kyazdani42/nvim-tree.lua {:mod :nvimtree}
-
+  :folke/which-key.nvim {:mod :which-key}
   :tsbohc/zest.nvim {}
   )
