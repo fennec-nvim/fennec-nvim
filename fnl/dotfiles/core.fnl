@@ -126,4 +126,5 @@
 ;-- vim.o.guifont = "JetBrainsMono\\ Nerd\\ Font\\ Mono:h18"
 (set nvim.o.guifont "JetBrainsMono Nerd Font:h15")
 
-(nvim.ex.colorscheme "gruvbox") ; set colorscheme to gruvbox
+(nvim.ex.colorscheme "fennec-gruvbox") ; set colorscheme to fennec-gruvbox
+;(set vim.g.gruvbox_flat_style "dark")
