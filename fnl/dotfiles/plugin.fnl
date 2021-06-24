@@ -77,10 +77,9 @@
   :wbthomason/packer.nvim {}
   :wlangstroth/vim-racket {}
 
-  :navarasu/onedark.nvim {}
-  :christianchiarulli/nvcode-color-schemes.vim {}
   :rktjmp/lush.nvim {}
-  :svitax/gruvbox.nvim {}
+  ; :eddyekofo94/gruvbox-flat.nvim {}
+  :svitax/fennec-gruvbox.nvim {}
   :nvim-treesitter/nvim-treesitter {:run ":TSUpdate" :mod :treesitter}
   :kyazdani42/nvim-web-devicons {}
   :kyazdani42/nvim-tree.lua {:mod :nvimtree}
