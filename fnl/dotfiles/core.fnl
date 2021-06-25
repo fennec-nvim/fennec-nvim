@@ -42,8 +42,8 @@
 (vim.cmd "set whichwrap+=<,>,[,],h,l")
 
 ;vim.cmd('syntax on') -- syntax highlighting
-; (nvim.ex.syntax :on) ; syntax highlighting
-(nvim.ex.syntax (. doom :syntax))
+(nvim.ex.syntax :on) ; syntax highlighting
+; (nvim.ex.syntax (. fennec :syntax))
 
 ;vim.o.pumheight = 10 -- Makes popup menu smaller
 (set vim.o.pumheight 10) ; Makes popup menu smaller
@@ -88,7 +88,7 @@
 ;(set vim.wo.number true)
 
 ;vim.wo.relativenumber = O.relative_number -- set relative number
-;(set vim.wo.relativenumber (. doom :relative_number))
+;(set vim.wo.relativenumber (. fennec :relative_number))
 
 ;vim.wo.cursorline = true -- Enable highlighting of the current line
 (set vim.wo.cursorline true)
@@ -128,3 +128,6 @@
 
 (nvim.ex.colorscheme "fennec-gruvbox") ; set colorscheme to fennec-gruvbox
 ;(set vim.g.gruvbox_flat_style "dark")
+
+(nvim.ex.set :number)
+(nvim.ex.set :relativenumber)
