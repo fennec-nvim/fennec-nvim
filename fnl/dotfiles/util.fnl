@@ -21,8 +21,3 @@
     (.. "<leader>" from)
     (.. ":" to "<cr>")
     {:noremap true}))
-
-(global doom {
-        :syntax :on
-        :number true
-        :relative_number true})

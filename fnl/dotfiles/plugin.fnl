@@ -22,6 +22,34 @@
             (-?> (. opts :mod) (safe-require-plugin-config))
             (use (a.assoc opts 1 name))))))))
 
+
+; initially everything is disabled
+(var disable_modules {:lightspeed true
+                      :lsp true
+                      :treesitter true
+                      :autocomplete true
+                      :snippets true
+                      :explorer true
+                      :commands true
+                      :comments true
+                      :telescope true
+                      :ui true
+                      :git true
+                      :terminal true
+                      :debug true
+                      :notes true
+                      :jupyter true
+                      :lisps true
+                      :sessions true
+                      :color true })
+
+;; func to ennable modules from (fennec.modules)
+(defn- set-modules [modules]
+  (each [index value (ipairs modules)]
+    (tset disable_modules value false)))
+
+(set-modules fennec.modules)
+
 ;; Plugins to be managed by packer.
 (use
   ; "~/repos/Olical/conjure" {:mod :conjure}
