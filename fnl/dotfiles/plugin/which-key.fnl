@@ -1,3 +1,4 @@
+(require-macros :zest.macros)
 (module plugin.which-key {autoload {which-key which-key
                                     nvim aniseed.nvim}})
 
@@ -17,8 +18,8 @@
                           :group "+"} ; symbol prepended to a group
                   :window {:border "single" ; none, single, double, shadow
                            :position "bottom" ; bottom, top
-                           :margin [1 0 1 0] ; extra window margin [top, right, bottom, left]
-                           :padding [2 2 2 2]} ; extra window padding [top, right, bottom, left]
+                           :margin [0 0 0 0] ; extra window margin [top, right, bottom, left]
+                           :padding [0 0 0 0]} ; extra window padding [top, right, bottom, left]
                   :layout {:height {:min 4 ; min and max height of the columns
                                     :max 25} 
                            :width {:min 20 ; min and max width of the columns
@@ -26,4 +27,3 @@
                            :spacing 3} ; spacing between columns
                   :hidden ["<silent>" "<cmd>" "<Cmd>" "<CR>" "call" "lua" "^:" "^ "] ; hide mapping boilerplate
                   :show_help true}) ; show help message on the command line when the popup is visible
-
