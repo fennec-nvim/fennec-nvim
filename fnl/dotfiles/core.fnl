@@ -9,7 +9,7 @@
 (set nvim.o.sessionoptions "blank,curdir,folds,help,tabpages,winsize")
 (set nvim.o.inccommand :split)
 
-(nvim.ex.set :spell)
+(nvim.ex.set :nospell)
 (nvim.ex.set :list)
 
 ;; LunarVim settings.lua
@@ -126,8 +126,7 @@
 ;-- vim.o.guifont = "JetBrainsMono\\ Nerd\\ Font\\ Mono:h18"
 (set nvim.o.guifont "JetBrainsMono Nerd Font:h15")
 
-(nvim.ex.colorscheme "fennec-gruvbox") ; set colorscheme to fennec-gruvbox
-;(set vim.g.gruvbox_flat_style "dark")
+(nvim.ex.colorscheme (. fennec :colorscheme))
 
 (nvim.ex.set :number)
 (nvim.ex.set :relativenumber)
