@@ -20,7 +20,9 @@
 
 ;; Better movement keys
 (noremap :n :l :h)
+(noremap :v :l :h)
 (noremap :n ";" :l)
+(noremap :v ";" :l)
 
 ;; Spacemacs style leader mappings.
 (noremap :n :<leader>wm ":tab sp<cr>")
