@@ -18,6 +18,10 @@
 (noremap :c :jk :<c-c>)
 (noremap :t :jk :<c-\><c-n>)
 
+;; Better movement keys
+(noremap :n :l :h)
+(noremap :n ";" :l)
+
 ;; Spacemacs style leader mappings.
 (noremap :n :<leader>wm ":tab sp<cr>")
 (noremap :n :<leader>wc ":only<cr>")
@@ -40,6 +44,9 @@
 
 ;; explorer
 (noremap :n :<leader>e ":NvimTreeToggle<CR>")
+
+;; neogit
+(noremap :n :<leader>gg ":Neogit kind=vsplit<CR>")
 
 ;; telescope
 ; (noremap :n :<leader>f ":Telescope find_files<CR>")
