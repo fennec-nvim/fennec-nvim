@@ -1,3 +1,4 @@
+; TODO merge globals into core
 (module dotfiles.globals
   {autoload {a aniseed.core}})
 
