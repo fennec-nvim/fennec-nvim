@@ -1,5 +1,6 @@
 (module dotfiles.util
-  {require {nvim aniseed.nvim}})
+  {require {nvim aniseed.nvim
+            a aniseed.core}})
 
 (defn expand [path]
   (nvim.fn.expand path))

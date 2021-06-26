@@ -1,5 +1,4 @@
 (module dotfiles.fennec-settings)
 
-(global fennec {:modules [:lsp :treesitter :git :lightspeed]
-                :mouse true
-                :relative-num true})
+(fennec! :colorscheme "fennec-gruvbox"
+         :modules [:lsp :treesitter :git :lisps :explorer :lightspeed])
