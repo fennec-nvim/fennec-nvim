@@ -79,15 +79,18 @@
 ;; END typescript
 
 ;; START lua
+(local sumneko_root_path  (.. DATA_PATH "/lspinstall/lua"))
+(local sumneko_binary (.. sumneko_root_path "/sumneko-lua-language-server"))
+(local lua-server-cmd [sumneko-binary "-E" (.. sumneko_root_path "/main.lua")])
 (local lua-server-settings
        {:Lua {:runtime {:version :LuaJIT :path (vim.split package.path ";")}
               :diagnostics {:globals {1 :vim}}
               :workspace {:library {(vim.fn.expand :$VIMRUNTIME/lua) true
                                     (vim.fn.expand :$VIMRUNTIME/lua/vim/lsp) true}}}})
-
 (fn setup-lua-server []
   "Sets up the lua server"
-  (lspconfig.lua.setup {:settings lua-server-settings}))
+  (lspconfig.sumneko_lua.setup {:cmd lua-server-cmd 
+                                :settings lua-server-settings}))
 ;; END lua
 
 (fn setup-csharp-server []
@@ -143,3 +146,29 @@
                     {:texthl :LspDiagnosticsSignInformation
                      :text ""
                      :numhl :LspDiagnosticsSignInformation})
+;; Symbols for autocomplete
+(set vim.lsp.protocol.CompletionItemKind ["   (Text) "
+                                          "   (Method)"
+                                          "   (Function)"
+                                          "   (Constructor)"
+                                          " ﴲ  (Field)"
+                                          "[] (Variable)"
+                                          "   (Class)"
+                                          " ﰮ  (Interface)"
+                                          "   (Module)"
+                                          " 襁 (Property)"
+                                          "   (Unit)"
+                                          "   (Value)"
+                                          " 練 (Enum)"
+                                          "   (Keyword)"
+                                          "   (Snippet)"
+                                          "   (Color)"
+                                          "   (File)"
+                                          "   (Reference)"
+                                          "   (Folder)"
+                                          "   (EnumMember)"
+                                          " ﲀ  (Constant)"
+                                          " ﳤ  (Struct)"
+                                          "   (Event)"
+                                          "   (Operator)"
+                                          "   (TypeParameter)"])
