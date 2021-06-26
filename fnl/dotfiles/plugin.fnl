@@ -42,12 +42,10 @@
                       :lisps true
                       :sessions true
                       :color true })
-
 ;; func to ennable modules from (fennec.modules)
 (defn- set-modules [modules]
   (each [index value (ipairs modules)]
     (tset disable_modules value false)))
-
 (set-modules fennec.modules)
 
 ;; Plugins to be managed by packer.
@@ -62,10 +60,11 @@
   ;; -----[[------------]]-----
   ;; ---        LSP         ---
   ;; -----]]------------[[-----
-  :kabouzeid/nvim-lspinstall { :opt true }
-  :neovim/nvim-lspconfig { :opt true }
-  :folke/trouble.nvim { :opt true}
-  ; :glepnir/lspsaga.nvim { :opt true }
+  :kabouzeid/nvim-lspinstall { :mod :lsp }
+  :neovim/nvim-lspconfig { }
+  :jose-elias-alvarez/nvim-lsp-ts-utils {}
+  :folke/trouble.nvim { }
+  :glepnir/lspsaga.nvim { }
   ; :simrat39/symbols-outline.nvim { :opt true }
   ; TODO only works if you add require"lsp_signature".on_attach() to an lsp config you want it to appear in
   ; :ray-x/lsp_signature.nvim {:opt true}

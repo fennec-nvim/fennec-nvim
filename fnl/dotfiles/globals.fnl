@@ -84,6 +84,9 @@
             val (. settings (+ i 1))]
         (tset fennec key val))))))
 
+(global CONFIG_PATH (vim.fn.stdpath "config"))
 ; CONFIG_PATH = vim.fn.stdpath('config')
+(global DATA_PATH (vim.fn.stdpath "data"))
 ; DATA_PATH = vim.fn.stdpath('data')
+(global CACHE_PATH (vim.fn.stdpath "cache"))
 ; CACHE_PATH = vim.fn.stdpath('cache')
