@@ -2,7 +2,7 @@
 lua/
 
 # packer_compiled
-plugin/
+packer_compiled.vim
 
 # Compiled Lua sources
 luac.out
