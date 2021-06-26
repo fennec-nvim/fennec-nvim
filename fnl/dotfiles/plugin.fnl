@@ -198,7 +198,7 @@
   :tpope/vim-fugitive {:mod :fugitive :disable (. disable_modules :git)}
   ;;-- use {'tpope/vim-rhubarb', opt = true}
   ;;-- use {"pwntester/octo.nvim", opt = true}
-  :TimUntersberger/neogit {:disable (. disable_modules :git)}
+  :TimUntersberger/neogit {:mod :neogit :disable (. disable_modules :git)}
   ;;-- use {'mattn/vim-gist', opt = true}
   ;;-- use {"ThePrimeagen/git-worktree.nvim"}
 
