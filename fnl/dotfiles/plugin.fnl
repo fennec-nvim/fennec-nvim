@@ -261,5 +261,5 @@
   :tpope/vim-eunuch {}
   :tpope/vim-repeat {}
   :tweekmonster/startuptime.vim {}
-  :w0rp/ale {:mod :ale}
+  ; :w0rp/ale {:mod :ale}
   )

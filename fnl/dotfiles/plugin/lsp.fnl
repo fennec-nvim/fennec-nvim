@@ -6,8 +6,14 @@
                               nvim-lsp-ts-utils nvim-lsp-ts-utils
                               trouble trouble}})
 
+(tset vim.lsp.handlers :textDocument/publishDiagnostics 
+      (vim.lsp.with vim.lsp.diagnostic.on_publish_diagnostics {:virtual_text {:prefix ""
+                                                                              :spacing 0}
+                                                               :signs true
+                                                               :underline true}))
+
 ;; These servers get automatically setup
-(local auto-setup-servers [:json :tailwindcss :html :css :lua])
+(local auto-setup-servers [:json :tailwindcss :html :css :lua :efm])
 
 (fn server-installed [server]
   "Checks if the server is installed"
@@ -79,7 +85,7 @@
 ;; END typescript
 
 ;; START lua
-(local sumneko_root_path  (.. DATA_PATH "/lspinstall/lua"))
+(local sumneko_root_path (.. DATA_PATH "/lspinstall/lua"))
 (local sumneko_binary (.. sumneko_root_path "/sumneko-lua-language-server"))
 (local lua-server-cmd [sumneko-binary "-E" (.. sumneko_root_path "/main.lua")])
 (local lua-server-settings
@@ -92,6 +98,57 @@
   (lspconfig.sumneko_lua.setup {:cmd lua-server-cmd 
                                 :settings lua-server-settings}))
 ;; END lua
+
+;; START python
+(local pyright-binary (.. DATA_PATH "/lspinstall/python/node_modules/.bin/pyright-langserver"))
+(local python-server-cmd [pyright-binary "--stdio"])
+
+(local python-server-settings
+  {:python {:analysis {:typeCheckingMode "basic"
+                       :autoSearchPaths true
+                       :useLibraryCodeForTypes true}}})
+
+(local python-server-handlers
+     {:textDocument/publishDiagnostics (vim.lsp.with 
+                                         vim.lsp.diagnostic.on_publish_diagnostics {:virtual_text true
+                                                                                    :signs true
+                                                                                    :underline true
+                                                                                    :update_in_insert true})})
+
+(fn setup-python-server []
+  "Sets up the python server"
+  (lspconfig.pyright.setup {:cmd python-server-cmd
+                            :handlers python-server-handlers
+                            :settings python-server-settings}))
+;; END python
+
+;; START efm
+(local flake8 {:LintCommand "flake8 --ignore=E501 --stdin-display-name ${INPUT} -"
+               :lintStdin true
+               :lintFormats ["%f:%l:%c: %m"]})
+(local isort {:formatCommand "isort --quiet -"
+              :formatStdin true})
+(local yapf {:formatCommand "yapf --quiet"
+             :formatStdin true})
+(local black {:formatCommand "black --quiet -"
+             :formatStdin true})
+
+(local python-arguments [flake8 black])
+
+(local efm-server-cmd (.. DATA_PATH "/lspinstall/efm/efm-langserver"))
+(local efm-server-init_options {:documentFormatting true
+                                :codeAction false})
+(local efm-server-filetypes ["python" "lua"])
+(local efm-server-settings {:rootMarkers [".git/"]
+                            :languages {:python python-arguments}})
+
+(fn setup-efm-server []
+  "Sets up the efm server"
+  (lspconfig.efm.setup {:cmd efm-server-cmd
+                        :init_options efm-server-init_options
+                        :file_types efm-server-filetypes
+                        :settings efm-server-settings}))
+;; END efm
 
 (fn setup-csharp-server []
   "Sets up the csharp server"
@@ -121,7 +178,13 @@
     (setup-typescript-server))
   ;; If the csharp server is installed then set it up
   (when (server-installed :csharp)
-    (setup-csharp-server)))
+    (setup-csharp-server))
+  ;; If the python server is installed then set it up
+  (when (server-installed :python)
+    (setup-python-server)))
+  ;; If the efm server is installed then set it up
+  ; (when (server-installed :efm)
+    ; (setup-efm-server)))
 
 ;; Set up all the servers
 (setup-lsp-servers)
