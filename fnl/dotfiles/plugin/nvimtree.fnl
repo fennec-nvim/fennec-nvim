@@ -1,3 +1,4 @@
+;; TODO refactor to not use zest.macros
 (require-macros :zest.macros)
 (module dotfiles.plugin.nvimtree
   {autoload {nvim aniseed.nvim

@@ -1,14 +1,14 @@
-(require-macros :zest.macros)
+; (require-macros :zest.macros)
 (module dotfiles.plugin.better-default
   {autoload {nvim aniseed.nvim}})
 
 (set nvim.g.vim_better_default_persistent_undo true)
 (nvim.ex.runtime_ "plugin/default.vim")
 
-;(nvim.ex.set :number)
-;(nvim.ex.set :relativenumber)
-(se- number)
-(se- relativenumber)
+(nvim.ex.set :number)
+(nvim.ex.set :relativenumber)
+; (se- number)
+; (se- relativenumber)
 
 (nvim.ex.set :wrap)
 (nvim.ex.set "wildmode=full")

@@ -1,5 +1,4 @@
-(require-macros :zest.macros)
-(module plugin.which-key {autoload {which-key which-key
+(module dotfiles.plugin.which-key {autoload {which-key which-key
                                     nvim aniseed.nvim}})
 
 (which-key.setup {:plugins {:marks true ; shows a list of your marks on ' and `

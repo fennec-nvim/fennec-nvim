@@ -1,8 +1,7 @@
 (module dotfiles.module.mapping
   {require {nvim aniseed.nvim
             nu aniseed.nvim.util
-            core aniseed.core
-            which-key which-key}})
+            core aniseed.core}})
 
 (defn- noremap [mode from to]
   "Sets a mapping with {:noremap true}."

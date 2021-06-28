@@ -252,7 +252,7 @@
   :junegunn/fzf.vim {}
   :liuchengxu/vim-better-default {:mod :better-default}
   :mbbill/undotree {:mod :undotree}
-  :prettier/vim-prettier {:ft :javascript}
+  ; :prettier/vim-prettier {:ft :javascript}
   :radenling/vim-dispatch-neovim {}
   :tpope/vim-abolish {}
   :tpope/vim-commentary {}
