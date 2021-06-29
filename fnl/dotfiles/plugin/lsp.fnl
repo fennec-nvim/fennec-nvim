@@ -1,27 +1,34 @@
-;; TODO fix lsp support
-; (module dotfiles.plugin.lsp {autoload {nvim aniseed.nvim
-;                               core aniseed.core
-;                               which-key which-key
-;                               lspinstall lspinstall
-;                               lspconfig lspconfig
-;                               nvim-lsp-ts-utils nvim-lsp-ts-utils
-;                               trouble trouble
-;                               util dotfiles.util}})
-; 
-; (tset vim.lsp.handlers :textDocument/publishDiagnostics
-;       (vim.lsp.with vim.lsp.diagnostic.on_publish_diagnostics
-;                     {:virtual_text {:prefix "" :spacing 0}
-;                      :signs true
-;                      :underline true}))
-; 
+/;; TODO fix lsp support
+(module dotfiles.plugin.lsp {autoload {nvim aniseed.nvim
+                              core aniseed.core
+                              which-key which-key
+                              lspinstall lspinstall
+                              lspconfig lspconfig
+                              nvim-lsp-ts-utils nvim-lsp-ts-utils}})
+
 ; ;; These servers get automatically setup
-; (local auto-setup-servers [:json :tailwindcss :html :css :lua :efm])
-; 
-; (fn server-installed [server]
-;   "Checks if the server is installed"
-;   (core.some (partial = server) (lspinstall.installed_servers)))
-; 
-; (local general-config {})
+(local auto-setup-servers [:lua :python])
+
+(fn server-installed [server]
+  "Checks if the server is installed"
+  (core.some (partial = server) (lspinstall.installed_servers)))
+
+(defn- document-highlight [client bufnr]
+  (when client.resolved_capabilities.document_highlight
+    (vim.api.nvim_exec "      hi LspReferenceRead cterm=bold ctermbg=red guibg=#464646
+      hi LspReferenceText cterm=bold ctermbg=red guibg=#464646
+      hi LspReferenceWrite cterm=bold ctermbg=red guibg=#464646
+      augroup lsp_document_highlight
+        autocmd! * <buffer>
+        autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+        autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+      augroup END
+    " false)))
+
+(defn- common_on_attach [client bufnr]
+  (document-highlight client bufnr))
+
+(local general-config {})
 ; 
 ; (fn general-config.on_attach [client buffer]
 ;   (which-key.register {:<leader>l {:name "Language Server Provider"
@@ -86,185 +93,173 @@
 ;   (lspconfig.typescript.setup typescript-config))
 ; ;; END typescript
 ; 
-; ;; START lua
+;; START lua
 ; (local sumneko_root_path (.. DATA_PATH "/lspinstall/lua"))
 ; (local sumneko_binary (.. sumneko_root_path "/sumneko-lua-language-server"))
 ; (local lua-server-cmd [sumneko-binary "-E" (.. sumneko_root_path "/main.lua")])
-; (local lua-server-settings
-;        {:Lua {:runtime {:version :LuaJIT :path (vim.split package.path ";")}
-;               :diagnostics {:globals {1 :vim}}
-;               :workspace {:library {(vim.fn.expand :$VIMRUNTIME/lua) true
-;                                     (vim.fn.expand :$VIMRUNTIME/lua/vim/lsp) true}}}})
-; (fn setup-lua-server []
-;   "Sets up the lua server"
-;   (lspconfig.sumneko_lua.setup {:cmd lua-server-cmd 
-;                                 :settings lua-server-settings}))
-; ;; END lua
-; 
-; ;; START python
+
+(local lua-server-settings
+       {:Lua {:runtime {:version :LuaJIT :path (vim.split package.path ";")}
+              :diagnostics {:globals {1 :vim}}
+              :workspace {:library {(vim.fn.expand :$VIMRUNTIME/lua) true
+                                    (vim.fn.expand :$VIMRUNTIME/lua/vim/lsp) true}}}})
+(fn setup-lua-server []
+  "Sets up the lua server"
+  (lspconfig.sumneko_lua.setup {:on_attach common_on_attach
+                                :settings lua-server-settings}))
+;; END lua
+
+;; START python
 ; (local pyright-binary (.. DATA_PATH "/lspinstall/python/node_modules/.bin/pyright-langserver"))
 ; (local python-server-cmd [pyright-binary "--stdio"])
-; 
-; (local python-server-settings
-;   {:python {:analysis {:typeCheckingMode "basic"
-;                        :autoSearchPaths true
-;                        :useLibraryCodeForTypes true}}})
-; 
-; (local python-server-handlers
-;      {:textDocument/publishDiagnostics (vim.lsp.with 
-;                                          vim.lsp.diagnostic.on_publish_diagnostics {:virtual_text true
-;                                                                                     :signs true
-;                                                                                     :underline true
-;                                                                                     :update_in_insert true})})
-; 
-; (fn setup-python-server []
-;   "Sets up the python server"
-;   (lspconfig.pyright.setup {:cmd python-server-cmd
-;                             :handlers python-server-handlers
-;                             :settings python-server-settings}))
-; ;; END python
-; 
-; ;; START efm
-; (local flake8 {:LintCommand "flake8 --ignore=E501 --stdin-display-name ${INPUT} -"
-;                :lintStdin true
-;                :lintFormats ["%f:%l:%c: %m"]})
-; (local isort {:formatCommand "isort --quiet -"
-;               :formatStdin true})
-; (local yapf {:formatCommand "yapf --quiet"
-;              :formatStdin true})
-; (local black {:formatCommand "black --quiet -"
-;              :formatStdin true})
-; 
-; (local python-arguments {})
-; (table.insert python-arguments flake8)
-; (table.insert python-arguments isort)
-; (table.insert python-arguments yapf)
-; 
-; (local efm-server-cmd {1 (.. DATA_PATH :/lspinstall/efm/efm-langserver)})
-; (local efm-server-init_options {:documentFormatting true
-;                                 :codeAction false})
-; (local efm-server-filetypes ["python"])
-; (local efm-server-settings {:rootMarkers {1 :.git/}
-;                             :languages {:python python-arguments}})
-; 
-; (local auto-formatters {})
-; 
-; (local python-autoformat {1 :BufWritePre 2 :*.py 3 "lua vim.lsp.buf.formatting_sync(nil, 1000)"})
-; (table.insert auto-formatters python-autoformat)
-; 
-; (local lua-autoformat {1 :BufWritePre 2 :*.lua 3 "lua vim.lsp.buf.formatting_sync(nil, 1000)"})
-; (table.insert auto-formatters lua-autoformat)
-;
-;(global define_augroups [definitions]
-; (each [group-name definition (pairs definitions)]
-;   (vim.cmd (.. "augroup " group-name))
-;   (vim.cmd :autocmd!)
-;   (each [_ def (pairs definition)]
-;     (local command (table.concat (vim.tbl_flatten [:autocmd def]) " "))
-;     (vim.cmd command))
-;   (vim.cmd "augroup END")))
 
-; ; TODO require utils.define_augroups
-; ;(define_augroups {:_general_settings [ [:TextYankPost "*" "lua require('vim.highlight').on_yank({higroup = 'Search', timeout = 200})"]
-; ;                                            [:BufWinEnter "*" "setlocal formatoptions-=c formatoptions-=r formatoptions-=o"]
-; ;                                            [:BufRead "*" "setlocal formatoptions-=c formatoptions-=r formatoptions-=o"]
-; ;                                            [:BufNewFile "*" "setlocal formatoptions-=c formatoptions-=r formatoptions-=o"]
-; ;                                            [:VimLeavePre "*" "set title set titleold="]
-; ;                                            [:FileType "*" "set nobuflisted"]]
-; ;                       :_buffer_bindings [ [:FileType :dashboard "nnoremap <silent> <buffer> q :q<CR>"]
-; ;                                           [:FileType :lspinfo "nnoremap <silent> <buffer> q :q<CR>"]]
-; ;                       :_auto_formatters auto-formatters})
-; 
+(local python-server-settings
+  {:python {:analysis {:typeCheckingMode "off"
+                       :autoSearchPaths true
+                       :useLibraryCodeForTypes true}}})
+
+(local python-server-handlers
+     {:textDocument/publishDiagnostics (vim.lsp.with 
+                                         vim.lsp.diagnostic.on_publish_diagnostics {:virtual_text true
+                                                                                    :signs true
+                                                                                    :underline true
+                                                                                    :update_in_insert true})})
+
+(fn setup-python-server []
+  "Sets up the python server"
+  (lspconfig.pyright.setup {:on_attach common_on_attach
+                            :handlers python-server-handlers
+                            :settings python-server-settings}))
+;; END python
+
+;; START efm
+
+(local lua-arguments {})
+(local lua_fmt {:formatCommand "luafmt --indent-count 2 --line-width 120 --stdin"
+                :formatStdin true})
+(table.insert lua-arguments lua_fmt)
+
+(local python-arguments {})
+(local flake8 {:LintCommand "flake8 --ignore=E501 --stdin-display-name ${INPUT} -"
+               :lintStdin true
+               :lintFormats ["%f:%l:%c: %m"]})
+(table.insert python-arguments flake8)
+
+(local efm-server-init_options {:documentFormatting true
+                                :codeAction false})
+(local efm-server-filetypes ["python" "lua"])
+
+(local efm-server-settings
+  {:rootMarkers [:.git/]
+   :languages {:python python-arguments
+               :lua lua-arguments}})
+
 ; (fn setup-efm-server []
-;   "Sets up the efm server"
-;   (lspconfig.efm.setup {:cmd efm-server-cmd
-;                         :init_options efm-server-init_options
-;                         :file_types efm-server-filetypes
-;                         :settings efm-server-settings}))
-; ;; END efm
-; 
+  ; (lspconfig.efm.setup {:filtypes efm-server-filetypes
+                        ; :settings efm-server-settings}))
+
 ; (fn setup-csharp-server []
 ;   "Sets up the csharp server"
 ;   (lspconfig.csharp.setup {}))
 ; 
-; (fn setup-lsp-servers []
-;   "Sets up all lsp servers, installing & auto configuring ones that are 'auto-setup'"
-;   ;; Set up lspinstall
-;   (lspinstall.setup)
-;   ;; Register a post install hook
-; 
-;   (fn lspinstall.post_install_hook []
-;     "Register a post install hook that calls this setup servers function"
-;     (setup-lsp-servers)
-;     (vim.cmd "bufdo e"))
-; 
-;   ;; Auto set up certain servers and install them if they aren't yet installed
-;   (each [_ server (ipairs auto-setup-servers)]
-;     (if (server-installed server)
-;         ((. (. lspconfig server) :setup) general-config)
-;         (lspinstall.install_server server)))
-;   ;; If the lua server is installed then set it up
-;   (when (server-installed :lua)
-;     (setup-lua-server))
-;   ;; If the typescript server is installed then set it up
-;   (when (server-installed :typescript)
-;     (setup-typescript-server))
-;   ;; If the csharp server is installed then set it up
-;   (when (server-installed :csharp)
-;     (setup-csharp-server))
-;   ;; If the python server is installed then set it up
-;   (when (server-installed :python)
-;     (setup-python-server)))
-;   ;; If the efm server is installed then set it up
-;   ; (when (server-installed :efm)
-;     ; (setup-efm-server)))
-; 
-; ;; Set up all the servers
-; (setup-lsp-servers)
-; 
-; ;; Define new signs for lsp
-; (vim.fn.sign_define :LspDiagnosticsSignError
-;                     {:texthl :LspDiagnosticsSignError
-;                      :text ""
-;                      :numhl :LspDiagnosticsSignError})
-; 
-; (vim.fn.sign_define :LspDiagnosticsSignWarning
-;                     {:texthl :LspDiagnosticsSignWarning
-;                      :text ""
-;                      :numhl :LspDiagnosticsSignWarning})
-; 
-; (vim.fn.sign_define :LspDiagnosticsSignHint
-;                     {:texthl :LspDiagnosticsSignHint
-;                      :text ""
-;                      :numhl :LspDiagnosticsSignHint})
-; 
-; (vim.fn.sign_define :LspDiagnosticsSignInformation
-;                     {:texthl :LspDiagnosticsSignInformation
-;                      :text ""
-;                      :numhl :LspDiagnosticsSignInformation})
-; ;; Symbols for autocomplete
-; (set vim.lsp.protocol.CompletionItemKind ["   (Text) "
-;                                           "   (Method)"
-;                                           "   (Function)"
-;                                           "   (Constructor)"
-;                                           " ﴲ  (Field)"
-;                                           "[] (Variable)"
-;                                           "   (Class)"
-;                                           " ﰮ  (Interface)"
-;                                           "   (Module)"
-;                                           " 襁 (Property)"
-;                                           "   (Unit)"
-;                                           "   (Value)"
-;                                           " 練 (Enum)"
-;                                           "   (Keyword)"
-;                                           "   (Snippet)"
-;                                           "   (Color)"
-;                                           "   (File)"
-;                                           "   (Reference)"
-;                                           "   (Folder)"
-;                                           "   (EnumMember)"
-;                                           " ﲀ  (Constant)"
-;                                           " ﳤ  (Struct)"
-;                                           "   (Event)"
-;                                           "   (Operator)"
-;                                           "   (TypeParameter)"])
+(fn setup-lsp-servers []
+  "Sets up all lsp servers, installing & auto configuring ones that are 'auto-setup'"
+
+  ;; Set up lspinstall
+  (lspinstall.setup)
+
+  ;; Register a post install hook
+  (fn lspinstall.post_install_hook []
+    "Register a post install hook that calls this setup servers function"
+    (setup-lsp-servers)
+    (vim.cmd "bufdo e"))
+
+  ;; Auto set up certain servers and install them if they aren't yet installed
+  (each [_ server (ipairs auto-setup-servers)]
+    (if (server-installed server)
+        ((. (. lspconfig server) :setup) general-config)
+        (lspinstall.install_server server)))
+  ;; If the lua server is installed then set it up
+  (when (server-installed :lua)
+    (setup-lua-server))
+  ;; If the typescript server is installed then set it up
+  ; (when (server-installed :typescript)
+    ; (setup-typescript-server))
+  ;; If the csharp server is installed then set it up
+  ; (when (server-installed :csharp)
+    ; (setup-csharp-server))
+  ;; If the python server is installed then set it up
+  (when (server-installed :python)
+    (setup-python-server)))
+  ;; If the efm server is installed then set it up
+  ; (when (server-installed :efm)
+    ; (setup-efm-server)))
+
+;; Set up all the servers
+(setup-lsp-servers)
+;; Define new signs for lsp
+(vim.fn.sign_define :LspDiagnosticsSignError
+                    {:texthl :LspDiagnosticsSignError
+                     :text ""
+                     :numhl :LspDiagnosticsSignError})
+
+(vim.fn.sign_define :LspDiagnosticsSignWarning
+                    {:texthl :LspDiagnosticsSignWarning
+                     :text ""
+                     :numhl :LspDiagnosticsSignWarning})
+
+(vim.fn.sign_define :LspDiagnosticsSignHint
+                    {:texthl :LspDiagnosticsSignHint
+                     :text ""
+                     :numhl :LspDiagnosticsSignHint})
+
+(vim.fn.sign_define :LspDiagnosticsSignInformation
+                    {:texthl :LspDiagnosticsSignInformation
+                     :text ""
+                     :numhl :LspDiagnosticsSignInformation})
+
+(vim.cmd "nnoremap <silent> gd <cmd>lua vim.lsp.buf.definition()<CR>")
+(vim.cmd "nnoremap <silent> gD <cmd>lua vim.lsp.buf.declaration()<CR>")
+(vim.cmd "nnoremap <silent> gr <cmd>lua vim.lsp.buf.references()<CR>")
+(vim.cmd "nnoremap <silent> gi <cmd>lua vim.lsp.buf.implementation()<CR>")
+(vim.cmd "nnoremap <silent> ca :Lspsaga code_action<CR>")
+(vim.cmd "nnoremap <silent> K :Lspsaga hover_doc<CR>")
+(vim.cmd "nnoremap <silent> <C-p> :Lspsaga diagnostic_jump_prev<CR>")
+(vim.cmd "nnoremap <silent> <C-n> :Lspsaga diagnostic_jump_next<CR>")
+(vim.cmd "nnoremap <silent> <C-f> <cmd>lua require('lspsaga.action').smart_scroll_with_saga(1)<CR>")
+(vim.cmd "nnoremap <silent> <C-b> <cmd>lua require('lspsaga.action').smart_scroll_with_saga(-1)<CR>")
+(vim.cmd "command! -nargs=0 LspVirtualTextToggle lua require(\"lsp/virtual_text\").toggle()")
+
+; Set default prefix
+(tset vim.lsp.handlers :textDocument/publishDiagnostics
+      (vim.lsp.with vim.lsp.diagnostic.on_publish_diagnostics
+                    {:virtual_text {:prefix "" :spacing 0}
+                     :signs true
+                     :underline true}))
+;; Symbols for autocomplete
+(set vim.lsp.protocol.CompletionItemKind ["   (Text) "
+                                          "   (Method)"
+                                          "   (Function)"
+                                          "   (Constructor)"
+                                          " ﴲ  (Field)"
+                                          "[] (Variable)"
+                                          "   (Class)"
+                                          " ﰮ  (Interface)"
+                                          "   (Module)"
+                                          " 襁 (Property)"
+                                          "   (Unit)"
+                                          "   (Value)"
+                                          " 練 (Enum)"
+                                          "   (Keyword)"
+                                          "   (Snippet)"
+                                          "   (Color)"
+                                          "   (File)"
+                                          "   (Reference)"
+                                          "   (Folder)"
+                                          "   (EnumMember)"
+                                          " ﲀ  (Constant)"
+                                          " ﳤ  (Struct)"
+                                          "   (Event)"
+                                          "   (Operator)"
+                                          "   (TypeParameter)"])
+

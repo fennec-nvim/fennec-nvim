@@ -62,6 +62,7 @@
   ;; -----]]------------[[-----
   :kabouzeid/nvim-lspinstall { :mod :lsp }
   :neovim/nvim-lspconfig { }
+  :mfussenegger/nvim-lint {}
   :jose-elias-alvarez/nvim-lsp-ts-utils {}
   :folke/trouble.nvim { }
   :glepnir/lspsaga.nvim { }
@@ -261,5 +262,5 @@
   :tpope/vim-eunuch {}
   :tpope/vim-repeat {}
   :tweekmonster/startuptime.vim {}
-  ; :w0rp/ale {:mod :ale}
+  :w0rp/ale {:mod :ale}
   )
