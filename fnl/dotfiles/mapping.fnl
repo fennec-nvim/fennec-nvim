@@ -12,6 +12,12 @@
 (set nvim.g.mapleader " ")
 (set nvim.g.maplocalleader ",")
 
+;; Better movement keys
+(noremap :n :l :h)
+(noremap :v :l :h)
+(noremap :n ";" :l)
+(noremap :v ";" :l)
+
 ;; jk escape sequences.
 (noremap :i :jk :<esc>)
 (noremap :c :jk :<c-c>)
