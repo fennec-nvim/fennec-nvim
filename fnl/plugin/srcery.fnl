@@ -1,6 +1,6 @@
-(module dotfiles.plugin.srcery
+(module plugin.srcery
   {autoload {nvim aniseed.nvim}
-   require-macros [dotfiles.macros]})
+   require-macros [macros]})
 
 (defn colorscheme-fixes []
   (_: hi :SpellBad :gui=underline)

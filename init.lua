@@ -23,6 +23,6 @@ ensure("Olical", "aniseed")
 
 -- Enable Aniseed's automatic compilation and loading of Fennel source code.
 vim.g["aniseed#env"] = {
-  module = "dotfiles.init",
+  module = "init",
   compile = true
 }

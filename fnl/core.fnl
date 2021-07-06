@@ -1,4 +1,4 @@
-(module dotfiles.core
+(module core
   {autoload {nvim aniseed.nvim}})
 
 ;; Generic Neovim configuration.

@@ -1,5 +1,5 @@
-(module dotfiles.plugin.compe
-  {autoload {compe compe
+(module plugin.comment
+  {autoload {nvim-comment nvim_comment
              nvim aniseed.nvim}})
 
 (set nvim.o.completeopt "menuone,noselect")

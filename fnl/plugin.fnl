@@ -1,11 +1,11 @@
-(module dotfiles.plugin
+(module plugin
   {autoload {nvim aniseed.nvim
              a aniseed.core
-             util dotfiles.util
+             util util
              packer packer}})
 
 (defn safe-require-plugin-config [name]
-  (let [(ok? val-or-err) (pcall require (.. :dotfiles.plugin. name))]
+  (let [(ok? val-or-err) (pcall require (.. :plugin. name))]
     (when (not ok?)
       (print (.. "dotfiles error: " val-or-err)))))
 
@@ -24,6 +24,8 @@
 
 ;; Plugins to be managed by packer.
 (use
+
+  :terrortylor/nvim-comment {:mod :comment}
   ; "~/repos/Olical/conjure" {:mod :conjure}
   ; "~/repos/Olical/aniseed" {}
   ; "~/repos/Olical/nvim-local-fennel" {}
@@ -51,7 +53,7 @@
   :junegunn/fzf {:mod :fzf}
   :junegunn/fzf.vim {}
   :lambdalisue/suda.vim {}
-  :liuchengxu/vim-better-default {:mod :better-default}
+  ; :liuchengxu/vim-better-default {:mod :better-default}
   :maxmellon/vim-jsx-pretty {}
   :mbbill/undotree {:mod :undotree}
   :norcalli/nvim-colorizer.lua {:mod :colorizer}

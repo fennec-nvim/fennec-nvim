@@ -1,5 +1,5 @@
-(module dotfiles.plugin.fugitive
-  {autoload {util dotfiles.util}})
+(module plugin.fugitive
+  {autoload {util util}})
 
 (util.nnoremap :gs "Git")
 (util.nnoremap :gb "Git blame")

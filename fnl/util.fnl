@@ -1,4 +1,4 @@
-(module dotfiles.util
+(module util
   {autoload {nvim aniseed.nvim}})
 
 (defn expand [path]

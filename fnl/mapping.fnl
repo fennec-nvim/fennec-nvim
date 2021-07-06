@@ -1,4 +1,4 @@
-(module dotfiles.mapping
+(module mapping
   {autoload {nvim aniseed.nvim
              nu aniseed.nvim.util
              core aniseed.core}})
