@@ -23,6 +23,7 @@
             (-?> (. opts :mod) (safe-require-plugin-config))
             (use (a.assoc opts 1 name))))))))
 
+; TODO: lazyload everything. do the local M = {}, require"foo".config() trick for every file.
 (defn- req [name]
   "A shortcut to building a require string for your plugin
   configuration. Intended for use with packer's config or setup
@@ -55,6 +56,12 @@
 ;; Plugins to be managed by packer.
 (use
   ;; -----[[------------]]-----
+  ;; ---        Core        ---
+  ;; -----]]------------[[-----
+  :wbthomason/packer.nvim {}
+  :Olical/aniseed {:branch :develop}
+
+  ;; -----[[------------]]-----
   ;; ---      Comments      ---
   ;; -----]]------------[[-----
   :terrortylor/nvim-comment {; :cmd :CommentToggle
@@ -72,9 +79,15 @@
                          ; :after [:telescope.nvim :nvim-compe]
                          :disable (. disable-modules :completion)
                          :config (req :auto-pairs)}
+
   :hrsh7th/nvim-compe {; :event :InsertEnter
                        :disable (. disable-modules :completion)
                        :config (req :compe)}
+  ; TODO make optional
+  ; :tzachar/compe-tabnine {:run :./install.sh
+  ;                         :requires :hrsh7th/nvim-compe}
+
+  :tami5/compe-conjure {}
 
   ;; -----[[------------]]-----
   ;; ---         UI         ---
@@ -82,58 +95,152 @@
   :folke/which-key.nvim {:disable (. disable-modules :ui)
                          :config (req :which-key)}
 
-  ; TODO make optional
-  ; :tzachar/compe-tabnine {:run :./install.sh
-  ;                         :requires :hrsh7th/nvim-compe}
-  :tami5/compe-conjure {}
+  :ChristianChiarulli/dashboard-nvim {:event :BufWinEnter
+                                      :cmd [:Dashboard :DashboardNewFile :DashboardJumpMarks]
+                                      :disable (. disable-modules :ui)
+                                      :config (req :dashboard)}
 
-  ; "~/repos/Olical/conjure" {:mod :conjure}
-  ; "~/repos/Olical/aniseed" {}
-  ; "~/repos/Olical/nvim-local-fennel" {}
+  :kyazdani42/nvim-web-devicons {:disable (. disable-modules :ui)}
 
-  :HerringtonDarkholme/yats.vim {}
-  :LnL7/vim-nix {}
-  :Olical/AnsiEsc {}
-  :Olical/aniseed {:branch :develop}
+  :kyazdani42/nvim-tree.lua {:disable (. disable-modules :ui)
+                             :config (req :tree)}
+
+  :glepnir/galaxyline.nvim {:disable (. disable-modules :ui)
+                            :config (req :galaxyline)}
+
+  ; :romgrk/barbar.nvim {:disable (. disable-modules :ui)
+  ;                      :config (req :barbar)}
+
+  :norcalli/nvim-colorizer.lua {:disable (. disable-modules :ui)
+                                :config (req :colorizer)}
+
+  :rktjmp/lush.nvim {:disable (. disable-modules :ui)}
+  :npxbr/gruvbox.nvim {}
+  :srcery-colors/srcery-vim {:mod :srcery}
+
+  ; :karb94/neoscroll.nvim {:disable (. disable-modules :ui)
+  ;                         :config (req :neoscroll)}
+
+  ;; -----[[------------]]-----
+  ;; ---      Telescope     ---
+  ;; -----]]------------[[-----
+  :nvim-lua/popup.nvim {}
+  :nvim-lua/plenary.nvim {}
+  :nvim-telescope/telescope.nvim {:cmd :Telescope
+                                  :disable (. disable-modules :telescope)
+                                  :config (req :telescope)}
+
+  :nvim-telescope/telescope-fzy-native.nvim {:event :BufRead
+                                             :disable (. disable-modules :telescope)}
+
+  :nvim-telescope/telescope-project.nvim {:event :BufRead
+                                          :after :telescope.nvim
+                                          :disable (. disable-modules :telescope)}
+  ;; -----[[------------]]-----
+  ;; ---      Checkers      ---
+  ;; -----]]------------[[-----
+  ; TODO: snipe some more treesitter configs from LunarVim
+  :nvim-treesitter/nvim-treesitter {:disable (. disable-modules :checkers)
+                                    :config (req :treesitter)
+                                    :run ":TSUpdate"}
+  ; :romgrk/nvim-treesitter-context {}
+  ; :lewis6991/spellsitter.nvim
+
+  ;; -----[[------------]]-----
+  ;; ---         Git        ---
+  ;; -----]]------------[[-----
+  :airblade/vim-gitgutter {}
+  :tpope/vim-fugitive {:mod :fugitive}
+  ; :lewis6991/gitsigns.nvim {}
+  ; :f-person/git-blame.nvim {}
+  ; :ruifm/gitlinker.nvim {}
+  ; :TimUntersberger/neogit {}
+  ; :pwntester/octo.nvim {}
+  ; :sindrets/diffview.nvim {}
+  ; :mattn/vim-gist {}
+  ; :kdheepak/lazygit.nvim {}
+
+
+  ;; -----[[------------]]-----
+  ;; ---         LSP        ---
+  ;; -----]]------------[[-----
+  ; :neovim/nvim-lspconfig {}
+  ; :kabouzeid/nvim-lspinstall {}
+  ; :tjdevries/astronauta.nvim {}
+  ; :folke/trouble.nvim {}
+  ; :ahmedkhalf/lsp-rooter.nvim {}
+  ; :ray-x/navigator.lua {}
+  ; :ray-x/guihua.lua {}
+  ; :ray-x/lsp_signature.nvim {}
+  ; :simrat39/symbols-outline.nvim {}
+  :w0rp/ale {:mod :ale}
+
+  ;; -----[[------------]]-----
+  ;; ---       Format       ---
+  ;; -----]]------------[[-----
+  ; :sbdchd/neoformat {}
+  ; :mhartington/formatter.nvim {}
+
+  ;; -----[[------------]]-----
+  ;; ---      Snippets      ---
+  ;; -----]]------------[[-----
+  ; :hrsh7th/vim-vsnip {:event "InsertEnter" }
+  ; :rafamadriz/friendly-snippets {:event "InsertEnter" }
+
+  ;; -----[[------------]]-----
+  ;; ---      Terminal      ---
+  ;; -----]]------------[[-----
+  ; :numToStr/Navigator.nvim {}
+  ; :akinsho/nvim-toggleterm.lua {}
+  :tpope/vim-eunuch {}
+
+  ;; -----[[------------]]-----
+  ;; ---        Debug       ---
+  ;; -----]]------------[[-----
+  ; :mfussenegger/nvim-dap {}
+  ; :rcarriga/nvim-dap-ui {}
+  ; :Pocco81/DAPInstall.nvim {}
+
+  ;; -----[[------------]]-----
+  ;; ---       Motion       ---
+  ;; -----]]------------[[-----
+  ; :chaoren/vim-wordmotion {}
+  ; :mg979/vim-visual-multi {}
+  ; :ggandor/lightspeed.nvim {}
+  ; :blackCauldron7/surround.nvim {}
+  ; :mizlan/iswap.nvim {}
+  :PeterRincker/vim-argumentative {}
+
+  ;; -----[[------------]]-----
+  ;; ---      Sessions      ---
+  ;; -----]]------------[[-----
+  ; :rmagatti/auto-session {}
+  ; :rmagatti/session-lens {}
+
+  ;; -----[[------------]]-----
+  ;; ---        Notes       ---
+  ;; -----]]------------[[-----
+  ; :vimwiki/vimwiki {:branch :dev}
+  ; :plasticboy/vim-markdown {}
+
+  ;; -----[[------------]]-----
+  ;; ---        Lisps       ---
+  ;; -----]]------------[[-----
   :Olical/conjure {:branch :develop :mod :conjure}
   :Olical/nvim-local-fennel {}
-  :Olical/vim-enmasse {}
-  :PeterRincker/vim-argumentative {}
-  :airblade/vim-gitgutter {}
   :clojure-vim/clojure.vim {}
   :clojure-vim/vim-jack-in {}
-  :dag/vim-fish {}
-  :easymotion/vim-easymotion {:mod :easymotion}
   :guns/vim-sexp {:mod :sexp}
-  :hashivim/vim-terraform {}
   :hylang/vim-hy {}
-  :itchyny/lightline.vim {:mod :lightline}
   :janet-lang/janet.vim {}
-  :junegunn/fzf {:mod :fzf}
-  :junegunn/fzf.vim {}
-  :lambdalisue/suda.vim {}
-  ; :liuchengxu/vim-better-default {:mod :better-default}
-  :maxmellon/vim-jsx-pretty {}
-  :mbbill/undotree {:mod :undotree}
-  :norcalli/nvim-colorizer.lua {:mod :colorizer}
-  :pangloss/vim-javascript {}
-  :prettier/vim-prettier {:ft :javascript}
-  :radenling/vim-dispatch-neovim {}
-  :srcery-colors/srcery-vim {:mod :srcery}
-  :tpope/vim-abolish {}
-  :tpope/vim-commentary {}
-  :tpope/vim-dadbod {}
   :tpope/vim-dispatch {}
-  :tpope/vim-eunuch {}
-  :tpope/vim-fugitive {:mod :fugitive}
-  :tpope/vim-repeat {}
+  :radenling/vim-dispatch-neovim {}
   :tpope/vim-sexp-mappings-for-regular-people {}
-  :tpope/vim-sleuth {}
-  :tpope/vim-surround {}
-  :tpope/vim-unimpaired {}
-  :tpope/vim-vinegar {}
-  :tweekmonster/startuptime.vim {}
-  :w0rp/ale {:mod :ale}
-  :wbthomason/packer.nvim {}
   :wlangstroth/vim-racket {}
+
+  ;; -----[[------------]]-----
+  ;; ---        Extras      ---
+  ;; -----]]------------[[-----
+  ; :mbbill/undotree {:mod :undotree}
+  ; :tweekmonster/startuptime.vim {}
   )
