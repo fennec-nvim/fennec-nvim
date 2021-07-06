@@ -1,4 +1,4 @@
-(module dotfiles.plugin.which-key {autoload {which-key which-key
+(module plugin.which-key {autoload {which-key which-key
                                     nvim aniseed.nvim}})
 
 (which-key.setup {:plugins {:marks true ; shows a list of your marks on ' and `
@@ -26,3 +26,5 @@
                            :spacing 3} ; spacing between columns
                   :hidden ["<silent>" "<cmd>" "<Cmd>" "<CR>" "call" "lua" "^:" "^ "] ; hide mapping boilerplate
                   :show_help true}) ; show help message on the command line when the popup is visible
+
+

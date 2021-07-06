@@ -1,4 +1,4 @@
-(module dotfiles.plugin.conjure
+(module plugin.conjure
   {autoload {nvim aniseed.nvim}})
 
 (set nvim.g.conjure#eval#result_register "*")

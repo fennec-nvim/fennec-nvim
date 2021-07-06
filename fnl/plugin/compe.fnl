@@ -1,4 +1,4 @@
-(module dotfiles.plugin.compe
+(module plugin.compe
   {autoload {compe compe
              nvim aniseed.nvim}})
 

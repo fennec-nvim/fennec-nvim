@@ -1,6 +1,6 @@
-(module dotfiles.plugin.fzf
+(module plugin.fzf
   {autoload {nvim aniseed.nvim
-             util dotfiles.util}})
+             util util}})
 
 (nvim.ex.command_
   "-bang -nargs=* Rg"
