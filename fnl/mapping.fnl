@@ -7,11 +7,6 @@
   "Sets a mapping with {:noremap true}."
   (nvim.set_keymap mode from to {:noremap true}))
 
-;; Generic mapping configuration.
-(nvim.set_keymap :n :<space> :<nop> {:noremap true})
-(set nvim.g.mapleader " ")
-(set nvim.g.maplocalleader ",")
-
 ;; Better movement keys
 (noremap :n :l :h)
 (noremap :v :l :h)

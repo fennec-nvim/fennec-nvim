@@ -4,6 +4,7 @@
              util util
              packer packer}})
 
+; TODO: require the configs inside packer instead
 (defn safe-require-plugin-config [name]
   (let [(ok? val-or-err) (pcall require (.. :plugin. name))]
     (when (not ok?)
@@ -22,10 +23,68 @@
             (-?> (. opts :mod) (safe-require-plugin-config))
             (use (a.assoc opts 1 name))))))))
 
+(defn- req [name]
+  "A shortcut to building a require string for your plugin
+  configuration. Intended for use with packer's config or setup
+  configuration options. Will prefix the name with `plugin.`
+  before requiring."
+  (.. "require('plugin." name "')"))
+
+(var disable-modules {:completion true
+                      :ui true
+                      :telescope true
+                      :comment true
+                      :git true
+                      :checkers true
+                      :lsp true
+                      :format true
+                      :snippets true
+                      :terminal true
+                      :debug true
+                      :motion true
+                      :sessions true
+                      :notes true
+                      :lisps true})
+
+(defn- set-modules [modules]
+  (each [index value (ipairs modules)]
+    (tset disable-modules value false)))
+
+(set-modules fennec.modules)
+
 ;; Plugins to be managed by packer.
 (use
+  ;; -----[[------------]]-----
+  ;; ---      Comments      ---
+  ;; -----]]------------[[-----
+  :terrortylor/nvim-comment {; :cmd :CommentToggle
+                             :disable (. disable-modules :comment)
+                             :config (req :comment)}
+  ; TODO make this optional
+  :folke/todo-comments.nvim {; :event :BufRead
+                             :disable (. disable-modules :comment)
+                             :config (req :todo-comments)}
 
-  :terrortylor/nvim-comment {:mod :comment}
+  ;; -----[[------------]]-----
+  ;; ---     Completion     ---
+  ;; -----]]------------[[-----
+  :jiangmiao/auto-pairs {; :event :InsertEnter
+                         ; :after [:telescope.nvim :nvim-compe]
+                         :disable (. disable-modules :completion)
+                         :config (req :auto-pairs)}
+  :hrsh7th/nvim-compe {; :event :InsertEnter
+                       :disable (. disable-modules :completion)
+                       :config (req :compe)}
+
+  ;; -----[[------------]]-----
+  ;; ---         UI         ---
+  ;; -----]]------------[[-----
+
+  ; TODO make optional
+  ; :tzachar/compe-tabnine {:run :./install.sh
+  ;                         :requires :hrsh7th/nvim-compe}
+  :tami5/compe-conjure {}
+
   ; "~/repos/Olical/conjure" {:mod :conjure}
   ; "~/repos/Olical/aniseed" {}
   ; "~/repos/Olical/nvim-local-fennel" {}
@@ -45,11 +104,9 @@
   :easymotion/vim-easymotion {:mod :easymotion}
   :guns/vim-sexp {:mod :sexp}
   :hashivim/vim-terraform {}
-  :hrsh7th/nvim-compe {:mod :compe}
   :hylang/vim-hy {}
   :itchyny/lightline.vim {:mod :lightline}
   :janet-lang/janet.vim {}
-  :jiangmiao/auto-pairs {:mod :auto-pairs}
   :junegunn/fzf {:mod :fzf}
   :junegunn/fzf.vim {}
   :lambdalisue/suda.vim {}
@@ -61,7 +118,6 @@
   :prettier/vim-prettier {:ft :javascript}
   :radenling/vim-dispatch-neovim {}
   :srcery-colors/srcery-vim {:mod :srcery}
-  :tami5/compe-conjure {}
   :tpope/vim-abolish {}
   :tpope/vim-commentary {}
   :tpope/vim-dadbod {}
