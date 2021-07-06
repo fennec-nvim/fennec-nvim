@@ -4,7 +4,7 @@
              util util
              packer packer}})
 
-; TODO: require the configs inside packer instead
+; TODO: require the configs inside packer instead (make sure no more :mod keys are required to safely delete this function)
 (defn safe-require-plugin-config [name]
   (let [(ok? val-or-err) (pcall require (.. :plugin. name))]
     (when (not ok?)
