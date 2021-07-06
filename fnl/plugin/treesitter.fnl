@@ -2,8 +2,7 @@
   {autoload {nvim aniseed.nvim
              treesitter-configs nvim-treesitter.configs}})
 
-(treesitter-configs.setup {:highlight {:enable true
-                                       :additional_vim_regex_highlighting {:fennel true}}
+(treesitter-configs.setup {:highlight {:enable true}
                            :matchup {:enable true}
                            :autotag {:enable true}})
 
