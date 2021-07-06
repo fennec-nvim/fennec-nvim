@@ -2,3 +2,5 @@
 /spell/
 /lua/
 /plugin/
+# macOS files
+.DS_Store

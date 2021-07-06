@@ -79,6 +79,8 @@
   ;; -----[[------------]]-----
   ;; ---         UI         ---
   ;; -----]]------------[[-----
+  :folke/which-key.nvim {:disable (. disable-modules :ui)
+                         :config (req :which-key)}
 
   ; TODO make optional
   ; :tzachar/compe-tabnine {:run :./install.sh

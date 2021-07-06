@@ -140,7 +140,4 @@
 (nvim.ex.set :spell)
 (nvim.ex.set :list)
 
-;; Generic mapping configuration.
-(nvim.set_keymap :n :<space> :<nop> {:noremap true})
-(set nvim.g.mapleader " ")
-(set nvim.g.maplocalleader ",")
+
