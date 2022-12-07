@@ -1,6 +1,7 @@
-/.netrwhist
-/spell/
-/lua/
-/plugin/
+.netrwhist
+spell/
+lua/
+plugin/
+profile.json
 # macOS files
 .DS_Store
