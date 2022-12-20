@@ -1,62 +1,60 @@
+;; fennel-ls: macro-file
+
+(local {: nil? : str? : ->str : begins-with? : all : crypt} (require :core.lib))
+
+(fn car [xs]
+  (. xs 1))
+
+(lambda expr->str [expr]
+  `(macrodebug ,expr nil))
+
 (tset _G :fennec/pack [])
 (tset _G :fennec/rock [])
 (tset _G :fennec/modules [])
 
-(λ expr->str [expr]
-  `(macrodebug ,expr nil))
-
-(fn nil? [x]
-  (= nil x))
-
-(fn str? [x]
-  (= :string (type x)))
-
-(fn num? [x]
+(lambda num? [x]
   (= :number (type x)))
 
-(fn bool? [x]
+(lambda bool? [x]
   (= :boolean (type x)))
 
-(fn fn? [x]
+(lambda fn? [x]
   (= :function (type x)))
 
-(fn tbl? [x]
+(lambda tbl? [x]
   (= :table (type x)))
 
-(fn ->str [x]
-  (tostring x))
-
-(fn ->bool [x]
+(lambda ->bool [x]
   (if x true false))
 
-(fn keys [t]
+(lambda keys [t]
   (let [result []]
     (when t
       (each [k _ (pairs t)]
         (table.insert result k)))
     result))
 
-(λ empty? [xs]
+(lambda empty? [xs]
   "Check if given table is empty"
   (assert-compile (tbl? xs) "expected table for xs" xs)
   (= 0 (length xs)))
 
-(λ first [xs]
+(lambda first [xs]
   "Get the first element in a list"
   (assert-compile (tbl? xs) "expected table for xs" xs)
   (. xs 1))
 
-(λ second [xs]
+(lambda second [xs]
   "Get the second element in a list"
   (assert-compile (tbl? xs) "expected table for xs" xs)
   (. xs 2))
 
-(λ last [xs]
+(lambda last [xs]
   "Get the last element in a list"
   (assert-compile (tbl? xs) "expected table for xs" xs)
   (. xs (length xs)))
 
-(λ count [xs]
+(lambda count [xs]
   "Count the number of items in a table"
   (if (tbl? xs)
       (let [maxn (table.maxn xs)]
@@ -67,17 +65,17 @@
       0
       (length xs)))
 
-(λ any? [pred xs]
+(lambda any? [pred xs]
   (accumulate [any? false _ v (ipairs xs) :until any?]
     (pred v)))
 
-(λ all? [pred xs]
+(lambda all? [pred xs]
   (not (any? #(not (pred $)) xs)))
 
-(λ contains? [xs x]
+(lambda contains? [xs x]
   (any? #(= $ x) xs))
 
-(λ flatten [x ?levels]
+(lambda flatten [x ?levels]
   (assert (tbl? x) "expected tbl for x")
   (assert (or (nil? ?levels) (num? ?levels))
           "expected number or nil for levels")
@@ -91,11 +89,7 @@
             (doto output (table.insert v))))
       x))
 
-(fn begins-with? [chars str]
-  "Return whether str begins with chars."
-  (->bool (str:match (.. "^" chars))))
-
-(fn djb2 [str]
+(lambda djb2 [str]
   "Implementation of the hash function djb2.
   Extracted the implementation from <https://theartincode.stanis.me/008-djb2/>."
   (let [bytes (icollect [char (str:gmatch ".")]
@@ -104,7 +98,7 @@
                (+ byte hash (bit.lshift hash 5)))]
     (bit.tohex hash)))
 
-(λ gensym-checksum [x ?options]
+(lambda gensym-checksum [x ?options]
   "Generates a new symbol from the checksum of the object passed as a parameter
   after it is casted into an string using the `view` function.
   You can also pass a prefix or a suffix into the options optional table.
@@ -114,31 +108,31 @@
         suffix (or options.suffix "")]
     (sym (.. prefix (djb2 (view x)) suffix))))
 
-(fn fn? [x]
+(lambda fn? [x]
   "Checks if `x` is a function definition.
   Cannot check if a symbol is a function in compile time."
   (and (list? x)
        (or (= `fn (first x)) (= `hashfn (first x)) (= `lambda (first x))
            (= `partial (first x)))))
 
-(fn quoted? [x]
+(lambda quoted? [x]
   "Check if `x` is a list that begins with `quote`."
   (and (list? x) (= `quote (first x))))
 
-(λ quoted->fn [expr]
+(lambda quoted->fn [expr]
   "Converts an expression like `(quote (+ 1 1))` into `(fn [] (+ 1 1))`."
   (assert-compile (quoted? expr) "expected quoted expression for expr" expr)
   (let [non-quoted (second expr)]
     `(fn []
        ,non-quoted)))
 
-(λ quoted->str [expr]
+(lambda quoted->str [expr]
   "Converts a quoted expression like `(quote (+ 1 1))` into an string with its shorthand form."
   (assert-compile (quoted? expr) "expected quoted expression for expr" expr)
   (let [non-quoted (second expr)]
     (.. "'" (view non-quoted))))
 
-(λ expand-exprs [exprs]
+(lambda expand-exprs [exprs]
   "Converts a list of expressions into either an expression - if only one
   expression is in the list - or a do-expression containing the expressions."
   (if (> (length exprs) 1)
@@ -146,12 +140,12 @@
          ,(unpack exprs))
       (first exprs)))
 
-(λ vlua [x]
+(lambda vlua [x]
   "Return a symbol mapped to `v:lua.%s()` where `%s` is the symbol."
   (assert-compile (sym? x) "expected symbol for x" x)
   (string.format "v:lua.%s()" (->str x)))
 
-(λ colorscheme [scheme]
+(lambda colorscheme [scheme]
   "Set a colorscheme using the vim.api.nvim_cmd API.
   Accepts the following arguements:
   scheme -> a symbol.
@@ -163,7 +157,7 @@
   (let [scheme (->str scheme)]
     `(vim.api.nvim_cmd {:cmd :colorscheme :args [,scheme]} {})))
 
-(λ custom-set-face! [name attributes colors]
+(lambda custom-set-face! [name attributes colors]
   "Sets a highlight group globally using the vim.api.nvim_set_hl API.
   Accepts the following arguments:
   name -> a symbol.
@@ -203,7 +197,7 @@
                      true)]
     `(vim.api.nvim_set_hl 0 ,name ,definition)))
 
-(λ set! [name ?value]
+(lambda set! [name ?value]
   "Set a vim option using the vim.opt.<name> API.
   Accepts the following arguments:
   name -> must be a symbol.
@@ -244,7 +238,7 @@
                                 _ `(tset vim.opt ,name ,value))))]
     (expand-exprs exprs)))
 
-(λ local-set! [name ?value]
+(lambda local-set! [name ?value]
   "Set a vim option using the vim.opt_local.<name> API.
   Accepts the following arguments:
   name -> must be a symbol.
@@ -285,7 +279,7 @@
                                 _ `(tset vim.opt_local ,name ,value))))]
     (expand-exprs exprs)))
 
-(λ shared-command! [api-function name command ?options]
+(lambda shared-command! [api-function name command ?options]
   (assert-compile (sym? api-function) "expected symbol for api-function"
                   api-function)
   (assert-compile (sym? name) "expected symbol for name" name)
@@ -299,15 +293,15 @@
         options (or ?options {})
         options (if (nil? options.desc)
                     (doto options
-                          (tset :desc
-                                (if (quoted? command) (quoted->str command)
-                                    (str? command) command
-                                    (view command))))
+                      (tset :desc
+                            (if (quoted? command) (quoted->str command)
+                                (str? command) command
+                                (view command))))
                     options)
         command (if (quoted? command) (quoted->fn command) command)]
     `(,api-function ,name ,command ,options)))
 
-(λ command! [name command ?options]
+(lambda command! [name command ?options]
   "Create a new user command using the vim.api.nvim_create_user_command API.
 
   Accepts the following arguments:
@@ -329,7 +323,7 @@
   ```"
   (shared-command! `vim.api.nvim_create_user_command name command ?options))
 
-(λ local-command! [name command ?options]
+(lambda local-command! [name command ?options]
   "Create a new user command using the vim.api.nvim_buf_create_user_command API.
 
   Accepts the following arguments:
@@ -351,7 +345,7 @@
   ```"
   (shared-command! `vim.api.nvim_buf_create_user_command name command ?options))
 
-(λ autocmd! [event pattern command ?options]
+(lambda autocmd! [event pattern command ?options]
   "Create an autocommand using the nvim_create_autocmd API.
 
   Accepts the following arguments:
@@ -405,20 +399,20 @@
         options (if (str? command)
                     (doto options (tset :command command))
                     (doto options
-                          (tset :callback
-                                (if (quoted? command)
-                                    (quoted->fn command)
-                                    command))))
+                      (tset :callback
+                            (if (quoted? command)
+                                (quoted->fn command)
+                                command))))
         options (if (nil? options.desc)
                     (doto options
-                          (tset :desc
-                                (if (quoted? command) (quoted->str command)
-                                    (str? command) command
-                                    (view command))))
+                      (tset :desc
+                            (if (quoted? command) (quoted->str command)
+                                (str? command) command
+                                (view command))))
                     options)]
     `(vim.api.nvim_create_autocmd ,event ,options)))
 
-(λ augroup! [name ...]
+(lambda augroup! [name ...]
   "Create an augroup using the nvim_create_augroup API.
   Accepts either a name or a name and a list of autocmd statements.
 
@@ -452,7 +446,7 @@
                         (let [[_ ?options] expr]
                           `(clear! ,name ,?options)))))))
 
-(λ clear! [name ?options]
+(lambda clear! [name ?options]
   "Clears an augroup using the nvim_clear_autocmds API.
 
   Example of use:
@@ -472,7 +466,7 @@
         options (doto options (tset :group name))]
     `(vim.api.nvim_clear_autocmds ,options)))
 
-(λ pack [identifier ?options]
+(lambda pack [identifier ?options]
   "Return a mixed table with the identifier as the first sequential element and
   options as hash-table items.
   See https://github.com/wbthomason/packer.nvim for information about the
@@ -495,7 +489,7 @@
                                                           (->str v)))
                     :defer (values :setup
                                    (let [package (->str v)]
-                                     `(λ []
+                                     `(lambda []
                                         (vim.api.nvim_create_autocmd [:BufRead
                                                                       :BufWinEnter
                                                                       :BufNewFile]
@@ -515,7 +509,7 @@
                     _ (values k v)))]
     (doto options (tset 1 identifier))))
 
-(λ rock [identifier ?options]
+(lambda rock [identifier ?options]
   "Return a mixed table with the identifier as the first sequential element and
   options as hash-table items.
   See https://github.com/wbthomason/packer.nvim for information about the
@@ -526,7 +520,7 @@
   (let [options (or ?options {})]
     (doto options (tset 1 identifier))))
 
-(λ use-package! [identifier ?options]
+(lambda use-package! [identifier ?options]
   "Declares a plugin with its options. This macro adds it to the fennec/pack
   global table to later be used in the `unpack!` macro.
   See https://github.com/wbthomason/packer.nvim for information about the
@@ -536,7 +530,7 @@
       (assert-compile (tbl? ?options) "expected table for options" ?options))
   (table.insert _G.fennec/pack (pack identifier ?options)))
 
-(λ rock! [identifier ?options]
+(lambda rock! [identifier ?options]
   "Declares a rock with its options. This macro adds it to the fennec/rock
   global table to later be used in the `unpack!` macro.
   See https://github.com/wbthomason/packer.nvim for information about the
@@ -546,19 +540,18 @@
       (assert-compile (tbl? ?options) "expected table for options" ?options))
   (table.insert _G.fennec/rock (rock identifier ?options)))
 
-(λ unpack! []
+(lambda unpack! []
   "Initializes the plugin manager with the plugins previously declared and
   their respective options."
   (let [packs (icollect [_ v (ipairs _G.fennec/pack)]
-                `(use ,v))
+                v)
         rocks (icollect [_ v (ipairs _G.fennec/rock)]
                 `(use_rocks ,v))
-        use-sym (sym :use)]
-    `((. (require :packer) :startup) (fn [,use-sym]
-                                       ,(unpack (icollect [_ v (ipairs packs) :into rocks]
-                                                  v))))))
+        plugin_spec [(unpack (icollect [_ v (ipairs packs) &into rocks]
+                               v))]]
+    `((. (require :lazy) :setup) ,plugin_spec)))
 
-(λ packadd! [package]
+(lambda packadd! [package]
   "Loads a package using the vim.api.nvim_cmd API.
   Accepts the following arguements:
   package -> a symbol.
@@ -570,7 +563,7 @@
   (let [package (->str package)]
     `(vim.api.nvim_cmd {:cmd :packadd :args [,package]} {})))
 
-(λ map! [[modes] lhs rhs ?options]
+(lambda map! [[modes] lhs rhs ?options]
   "Add a new mapping using the vim.keymap.set API.
 
   Accepts the following arguments:
@@ -605,15 +598,15 @@
         options (or ?options {})
         options (if (nil? options.desc)
                     (doto options
-                          (tset :desc
-                                (if (quoted? rhs) (quoted->str rhs)
-                                    (str? rhs) rhs
-                                    (view rhs))))
+                      (tset :desc
+                            (if (quoted? rhs) (quoted->str rhs)
+                                (str? rhs) rhs
+                                (view rhs))))
                     options)
         rhs (if (quoted? rhs) (quoted->fn rhs) rhs)]
     `(vim.keymap.set ,modes ,lhs ,rhs ,options)))
 
-(λ buf-map! [[modes] lhs rhs ?options]
+(lambda buf-map! [[modes] lhs rhs ?options]
   "Add a new mapping using the vim.keymap.set API.
   Sets by default the buffer option.
 
@@ -648,7 +641,7 @@
         options (doto options (tset :buffer 0))]
     (map! [modes] lhs rhs options)))
 
-(λ let-with-scope! [[scope] name value]
+(lambda let-with-scope! [[scope] name value]
   (assert-compile (or (str? scope) (sym? scope))
                   "expected string or symbol for scope" scope)
   (assert-compile (or (= :b (->str scope)) (= :w (->str scope))
@@ -664,13 +657,13 @@
               :t `vim.t
               :g `vim.g) ,name ,value)))
 
-(λ let-global! [name value]
+(lambda let-global! [name value]
   (assert-compile (or (str? name) (sym? name))
                   "expected string or symbol for name" name)
   (let [name (->str name)]
     `(tset vim.g ,name ,value)))
 
-(λ let! [...]
+(lambda let! [...]
   "Set a vim variable using the vim.<scope>.name API.
   Accepts the following arguments:
   [scope] -> optional. Can be either [g], [w], [t] or [b]. It's either a symbol
@@ -692,7 +685,7 @@
     [name value] (let-global! name value)
     _ (error "expected let! to have at least two arguments: name value")))
 
-(λ sh [...]
+(lambda sh [...]
   "simple macro to run shell commands inside fennel"
   `(let [str# ,(accumulate [str# "" _ v# (ipairs [...])]
                  (if (in-scope? v#) `(.. ,str# " " ,v#)
@@ -703,113 +696,106 @@
      (fd#:close)
      (string.sub d# 1 (- (length d#) 1))))
 
-;; (λ fennec! [...]
-;;   "Recreation of the `doom!` macro for fennec
-;;   See modules.fnl for usage
-;;   Accepts the following arguments:
-;;   value -> anything.
-;;   Example of use:
-;;   ```fennel
-;;   (fennec! :catagory
-;;           module
-;;           (module +with +flags
-;;           :anothercatagory
-;;           anothermodule
-;;           (module +with +more +flags)
-;;   ```"
-;;   (var moduletag nil)
-;;   (fn fennec-module-set [name]
-;;     (if (str? name)
-;;       (set moduletag name))
-;;     (if (sym? name)
-;;       (do
-;;         (table.insert _G.fennec/modules name)
-;;         (let [name (->str name)
-;;               include-path (.. :fnl.modules. moduletag "." name)
-;;               config-path (.. :modules. moduletag "." name :.config)]
-;;           `(do
-;;              (include ,include-path)
-;;              (pcall require ,config-path))))
-;;       (do
-;;         (table.insert _G.fennec/modules (first name))
-;;         (let [modulename (->str (first name))
-;;               include-path (.. :fnl.modules. moduletag "." modulename)
-;;               config-path (.. :modules. moduletag "." modulename :.config)
-;;               result `(do)]
-;;           (table.remove name 1)
-;;           (table.insert result `(include ,include-path))
-;;           (table.insert result `(pcall require ,config-path))
-;;           (each [_ v (ipairs name)]
-;;             (let [modulename (.. modulename "." (->str v))
-;;                   flag-include-path (.. include-path "." (->str v))
-;;                   flag-config-path (.. :modules. moduletag "." modulename :.config)]
-;;               (table.insert _G.fennec/modules (sym modulename))
-;;               (table.insert result `(include ,flag-include-path))
-;;               (table.insert result `(pcall require ,flag-config-path))))
-;;           result))))
-;;   (expand-exprs 
-;;     (icollect [_ name (ipairs [...])]
-;;       (fennec-module-set name))))
-
-(λ fennec! [...]
+(lambda fennec! [...]
   "Recreation of the `doom!` macro for fennec
   See modules.fnl for usage
   Accepts the following arguments:
   value -> anything.
   Example of use:
   ```fennel
-  (fennec! :catagory
+  (fennec! :category
           module
           (module +with +flags
-          :anothercatagory
+          :anothercategory
           anothermodule
           (module +with +more +flags)
   ```"
   (var moduletag nil)
+  (var registry {})
 
-  (fn fennec-module-set [name]
+  (fn register-module [name]
     (if (str? name)
         (set moduletag name)
         (if (sym? name)
-            (do
-              (table.insert _G.fennec/modules name)
-              (let [name (->str name)
-                    include-path (.. :fnl.modules. moduletag "." name)
-                    config-path (.. :modules. moduletag "." name :.config)]
-                `(do
-                   (include ,include-path)
-                   (pcall require ,config-path))))
-            (do
-              (table.insert _G.fennec/modules (first name))
-              (let [modulename (->str (first name))
-                    include-path (.. :fnl.modules. moduletag "." modulename)
-                    config-path (.. :modules. moduletag "." modulename :.config)
-                    result `(do)]
-                              
-                (table.remove name 1)
-                (table.insert result `(include ,include-path))
-                (table.insert result `(pcall require ,config-path))
-                (each [_ v (ipairs name)]
-                  (let [modulename (.. modulename "." (->str v))
-                        flag-include-path (.. include-path "." (->str v))
-                        flag-config-path (.. :modules. moduletag "." modulename
-                                             :.config)]
-                    (table.insert _G.fennec/modules (sym modulename))
-                    (table.insert result `(include ,flag-include-path))
-                    (table.insert result `(pcall require ,flag-config-path))))
-                result)))))
+            (let [name (->str name)
+                  include-path (.. :fnl.modules. moduletag "." name)
+                  config-path (.. :modules. moduletag "." name :.config)]
+              (tset registry name
+                    {:include-paths [include-path] :config-paths [config-path]}))
+            (let [modulename (->str (first name))
+                  include-path (.. :fnl.modules. moduletag "." modulename)
+                  config-path (.. :modules. moduletag "." modulename :.config)
+                  [_ & flags] name]
+              (var includes [include-path])
+              (var configs [config-path])
+              (each [_ v (ipairs flags)]
+                (let [flagmodule (.. modulename "." (->str v))
+                      flag-include-path (.. include-path "." (->str v))
+                      flag-config-path (.. :modules. moduletag "." flagmodule
+                                           :.config)]
+                  (table.insert includes flag-include-path)
+                  (table.insert configs flag-config-path)
+                  (tset registry flagmodule {})))
+              (tset registry modulename
+                    {:include-paths includes :config-paths configs})))))
 
-  (fn load-modules [...]
-    (match [...]
-      (where [& rest] (empty? rest)) []
-      [name & rest] [(fennec-module-set name)
-                     (unpack (load-modules (unpack rest)))]
-      _ []))
+  (fn register-modules [...]
+    (each [_ mod (ipairs [...])]
+      (register-module mod))
+    registry)
 
-  (let [exprs (load-modules ...)]
-    (expand-exprs exprs)))
+  (let [modules (register-modules ...)]
+    (tset _G :fennec/modules modules)
+    `(do
+       (tset _G :fennec/modules ,modules)
+       (. _G :fennec/modules))))
 
-(λ fennec-module! [name]
+(lambda fennec-init-modules! []
+  "Initializes fennec's module system.
+  ```fennel
+  (fennec-init-modules!)
+  ```"
+  (fn init-module [module-name module-def]
+    (icollect [_ include-path (ipairs (or module-def.include-paths []))]
+      `(include ,include-path)))
+
+  (fn init-modules [registry]
+    (icollect [module-name module-def (pairs registry)]
+      (init-module module-name module-def)))
+
+  (let [inits (init-modules _G.fennec/modules)]
+    (expand-exprs inits)))
+
+(lambda fennec-compile-modules! []
+  "Compiles and caches module files.
+  ```fennel
+  (fennec-compile-modules!)
+  ```"
+  (fn compile-module [module-name module-decl]
+    (icollect [_ config-path (ipairs (or module-decl.config-paths []))]
+      `,(pcall require config-path)))
+
+  (fn compile-modules [registry]
+    (icollect [module-name module-def (pairs registry)]
+      (compile-module module-name module-def)))
+
+  (let [source (compile-modules _G.fennec/modules)]
+    (expand-exprs [(unpack source)])))
+
+;; (lambda fennec-module! [name]
+;;   "By default modules should be loaded through use-package!. Of course, not every
+;;   modules needs a package. Sometimes we just want to load `config.fnl`. In this 
+;;   case, we can hack onto packer.nvim, give it a fake package, and ask it to load a 
+;;   config file.
+;;   Example of use:
+;;   ```fennel
+;;   (fennec-module! tools.tree-sitter)
+;;   ```"
+;;   (assert-compile (sym? name) "expected symbol for name" name)
+;;   (let [name (->str name)]
+;;     `(require (string.format "modules.%s.config" ,name))))
+
+(lambda fennec-module! [name]
   "By default modules should be loaded through use-package!. Of course, not every
   modules needs a package. Sometimes we just want to load `config.fnl`. In this 
   case, we can hack onto packer.nvim, give it a fake package, and ask it to load a 
@@ -819,10 +805,12 @@
   (fennec-module! tools.tree-sitter)
   ```"
   (assert-compile (sym? name) "expected symbol for name" name)
-  (let [name (->str name)]
-    (table.insert _G.fennec/pack (pack name {:fennec-module name}))))
+  (let [name (->str name)
+        hash (djb2 name)]
+    (table.insert _G.fennec/pack
+                  (pack (.. :fennec. hash) {:fennec-module name}))))
 
-(λ fennec-module-p! [name config]
+(lambda fennec-module-p! [name config]
   "Checks if a module is enabled
   Accepts the following arguements:
   name -> a symbol.
@@ -831,10 +819,12 @@
   (fennec-module-p! tree-sitter)
   ```"
   (assert-compile (sym? name) "expected symbol for name" name)
-  (when (contains? _G.fennec/modules name)
-    `,config))
+  (let [name (->str name)
+        module-exists (not= nil (. _G.fennec/modules name))]
+    (when module-exists
+      `,config)))
 
-(λ fennec-module-ensure! [name]
+(lambda fennec-module-ensure! [name]
   "Ensure a module is enabled
   Accepts the following arguements:
   name -> a symbol.
@@ -848,17 +838,20 @@
                   ". Please enable it")]
       `(vim.notify ,msg vim.log.levels.WARN))))
 
-;; These shouldn't be macros. However I kindof messed up by making all my 
-;; globals compile-time. So now we're sticking with it
-(λ fennec-package-count []
-  (let [packagecount (count _G.fennec/pack)]
-    `,packagecount))
+(lambda fennec-package-count! []
+  "Return number of installed packages"
+  (let [package-length (length _G.fennec/pack)]
+    `,package-length))
 
-(λ fennec-module-count []
-  (let [modulecount (count _G.fennec/modules)]
-    `,modulecount))
+(lambda fennec-module-count! []
+  "Return number of installed modules"
+  (let [module-length (length _G.fennec/modules)]
+    `,module-length))
 
 {: contains?
+ : empty?
+ : bool?
+ : second
  : expr->str
  : vlua
  : colorscheme
@@ -884,5 +877,7 @@
  : fennec-module!
  : fennec-module-p!
  : fennec-module-ensure!
- : fennec-package-count
- : fennec-module-count}
+ : fennec-init-modules!
+ : fennec-compile-modules!
+ : fennec-package-count!
+ : fennec-module-count!}

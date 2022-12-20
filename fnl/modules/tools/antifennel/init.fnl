@@ -1,3 +1,3 @@
-(import-macros {: use-package!} :macros)
+(import-macros {: fennec-module!} :macros)
 
-(use-package! :beardedsakimonkey/nvim-antifennel {:cmd :Antifennel})
+;; (fennec-module! tools.antifennel)
