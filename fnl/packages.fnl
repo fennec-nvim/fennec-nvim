@@ -89,6 +89,18 @@
 (use-package! :harrygallagher4/nvim-parinfer-rust)
 
 ; ╭──────────────────────────────────────────────────────────╮
+; │                          :lang                           │
+; ╰──────────────────────────────────────────────────────────╯
+
+; org
+; ────────────────────────────────────────────────────────────
+(use-package! :akinsho/org-bullets.nvim)
+(use-package! :lukas-reineke/headlines.nvim)
+(use-package! :nvim-orgmode/orgmode
+              {:config (fn []
+                         (require :modules.lang.org.config))})
+
+; ╭──────────────────────────────────────────────────────────╮
 ; │                          :tools                          │
 ; ╰──────────────────────────────────────────────────────────╯
 
