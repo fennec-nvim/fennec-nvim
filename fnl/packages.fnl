@@ -164,8 +164,7 @@
 
 ; modeline
 ; ────────────────────────────────────────────────────────────
-;; TODO: use lualine for statusline instead
-(use-package! :b0o/incline.nvim
+(use-package! :nvim-lualine/lualine.nvim
               {:config (fn []
                          (require :modules.ui.modeline.config))})
 
