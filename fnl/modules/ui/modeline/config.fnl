@@ -27,38 +27,39 @@
                :blend "#131313"
                :none :NONE})
 
+;; TODO: add better documentation for modeline module
 ;; TODO: fix flicker when opening Telescope buffers
 
-(fn buf-filetype? [filetypes]
+(lambda buf-filetype? [filetypes]
   (assert (or (table? filetypes) (str? filetypes))
           "Argument to function `buf-filetype?` must be a list or a string.")
   (if (table? filetypes) (contains? filetypes vim.bo.filetype)
       (str? filetypes) (contains? [filetypes] vim.bo.filetype)))
 
-(fn buf-new-file? []
+(lambda buf-new-file? []
   (local filename (vim.fn.expand "%"))
   (and (not= filename "") (= vim.bo.buftype "")
        (= (vim.fn.filereadable filename) 0)))
 
-(fn buf-unnamed? []
+(lambda buf-unnamed? []
   (= (vim.fn.expand "%") ""))
 
 (local components {})
-(tset components :gutter {1 (fn []
+(tset components :gutter {1 (lambda []
                               git-icons.gutter)
                           :padding {:left 0 :right 0}
                           :color {:fg (. colors :base12)}
                           :cond nil})
 
 (tset components :mode
-      {1 (fn []
+      {1 (lambda []
            (.. " " modeline-icons.evil " "))
        :padding {:left 0 :right 0}
        :color []
        :cond #(not (buf-filetype? :alpha))})
 
 (tset components :search-count
-      {1 (fn []
+      {1 (lambda []
            (when (= vim.v.hlsearch 0)
              (lua "return \"\""))
            (local (ok count) (pcall vim.fn.searchcount {:recompute true}))
@@ -80,7 +81,7 @@
        :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :buf-modified
-      {1 (fn []
+      {1 (lambda []
            (var fg (. colors :base09))
            (var mod "")
            (when vim.bo.modified
@@ -103,13 +104,13 @@
        :color :lualine_filename_status
        :cond #(not (buf-filetype? :TelescopePrompt))})
 
-(tset components :dir {1 (fn []
+(tset components :dir {1 (lambda []
                            (.. (vim.fn.expand "%:p:h:t") "/"))
                        :padding {:left 1 :right 0}
                        :color :lualine_filename_status})
 
 (tset components :filename {1 :filename
-                            :fmt (fn [filename context]
+                            :fmt (lambda [filename context]
                                    (if (buf-unnamed?) "" filename))
                             :file_status false
                             :color {:gui :bold}
@@ -145,7 +146,7 @@
                  :hint (.. diagnostic-icons.bold-hint " ")}})
 
 (tset components :lsp
-      {1 (fn [msg]
+      {1 (lambda [msg]
            (var msg (or msg "LS Inactive"))
            (local buf-clients (vim.lsp.buf_get_clients))
            (if (= (next buf-clients) nil)
@@ -187,13 +188,13 @@
        :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :spaces
-      {1 (fn []
+      {1 (lambda []
            (local shiftwidth (vim.api.nvim_buf_get_option 0 :shiftwidth))
            (.. modeline-icons.tab " " shiftwidth))})
 
 (tset components :filetype
       {1 :filetype
-       :fmt (fn [filetype context]
+       :fmt (lambda [filetype context]
               (set context.options.icons_enabled false)
               (if (buf-filetype? [:alpha])
                   (do
@@ -209,7 +210,7 @@
       {1 :location :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :progress {1 :progress
-                            :fmt (fn []
+                            :fmt (lambda []
                                    "%P")
                             ;; "%P/%L")
                             :cond #(not (buf-filetype? [:alpha
@@ -251,109 +252,3 @@
                           :inactive {:a {:fg colors.base06 :bg colors.blend}
                                      :b {:bg colors.blend}
                                      :c {:bg colors.blend}}}}})
-
-;; modeline
-
-;; ;; by default these can be blank:
-
-;; (global Statusline {})
-;; (set Statusline.statusline
-;;      (fn []
-;;        (table.concat [(color)
-;;                       (: (string.format " %s "
-;;                                         (. modes
-;;                                            (. (vim.api.nvim_get_mode) :mode)))
-;;                          :upper)
-;;                       (get-fileinfo)
-;;                       (get-git-status)
-;;                       (get-bufnr)
-;;                       "%="
-;;                       (get-lsp-diagnostic)
-;;                       (get-filetype)
-;;                       (get-searchcount)])))
-
-;; (set! laststatus 3)
-;; (set! cmdheight 0)
-;; (set! statusline (.. "%!" (vlua Statusline.statusline)))
-
-;; (fn load-incline []
-;;   (do
-;;     (local {: diagnostic-icons} (autoload :core.shared))
-;;     (fn incline-diagnostic-label [props]
-;;       (let [label {}]
-;;         (each [severity icon (pairs diagnostic-icons)]
-;;           (local n
-;;                  (length (vim.diagnostic.get props.buf
-;;                                              {:severity (. vim.diagnostic.severity
-;;                                                            (string.upper severity))})))
-;;           (when (> n 0)
-;;             (table.insert label
-;;                           {1 (.. icon " " n " ")
-;;                            :group (.. :DiagnosticSign severity)})))
-;;         (when (> (length label) 0)
-;;           (table.insert label [" "]))
-;;         label))
-
-;;     (fn incline-git-diff [props]
-;;       (let [icons {:removed "" :changed "" :added ""}
-;;             labels {}
-;;             signs (vim.api.nvim_buf_get_var props.buf :gitsigns_status_dict)]
-;;         (each [name icon (pairs icons)]
-;;           (when (and (tonumber (. signs name)) (> (. signs name) 0))
-;;             (table.insert labels
-;;                           {1 (.. icon " " (. signs name) " ")
-;;                            :group (.. :Diff name)})))
-;;         (when (> (length labels) 0)
-;;           (table.insert labels [" "]))
-;;         labels))
-
-;;     (setup :incline {:render (fn [props]
-;;                                (local filename
-;;                                       (vim.fn.fnamemodify (vim.api.nvim_buf_get_name props.buf)
-;;                                                           ":t"))
-;;                                (local (ft-icon ft-color)
-;;                                       ((. (autoload :nvim-web-devicons)
-;;                                           :get_icon_color) filename))
-;;                                (local modified
-;;                                       (or (and (vim.api.nvim_buf_get_option props.buf
-;;                                                                             :modified)
-;;                                                "bold,italic")
-;;                                           :bold))
-;;                                (local buffer
-;;                                       [[(incline-diagnostic-label props)]
-;;                                        [(incline-git-diff props)]
-;;                                        {1 ft-icon :guifg ft-color}
-;;                                        [" "]
-;;                                        {1 filename :gui modified}])
-;;                                buffer)
-;;                      :hide {:cursorline true :focused_win false :only_win true}
-;;                      :ignore {:buftypes {}
-;;                               :filetypes [:fugitiveblame
-;;                                           :DiffviewFiles
-;;                                           :DiffviewFileHistory
-;;                                           :DiffviewFHOptionPanel
-;;                                           :Outline
-;;                                           :dashboard]
-;;                               :floating_wins true
-;;                               :unlisted_buffers false
-;;                               :wintypes :special}
-;;                      :highlight {:groups {:InclineNormal :NONE
-;;                                           :InclineNormalNC :NONE}}
-;;                      :window {:margin {:horizontal {:left 0 :right 1}
-;;                                        :vertical {:bottom 0 :top 1}}
-;;                               :options {:winblend 20
-;;                                         :signcolumn :no
-;;                                         :wrap false}
-;;                               :padding {:left 2 :right 2}
-;;                               :padding_char " "
-;;                               :placement {:vertical :top :horizontal :right}
-;;                               :width :fit
-;;                               :winhighlight {:active {:EndOfBuffer :None
-;;                                                       :Normal :InclineNormal
-;;                                                       :Search :None}
-;;                                              :inactive {:EndOfBuffer :None
-;;                                                         :Normal :InclineNormalNC
-;;                                                         :Search :None}}
-;;                               :zindex 10}})))
-
-;; (autocmd! [:BufAdd :TabEnter] * `(load-incline))
