@@ -75,6 +75,30 @@
   ```"
   (= :boolean (type x)))
 
+(fn stdlib.table? [x]
+  "Returns true if the given value is a table, false otherwise.
+  Arguments:
+  * `x`: a value
+
+  Example:
+  ```fennel
+  (assert (= (table? {:key \"value\"}) true))
+  (assert (= (table? \"hello world\") false))
+  ```"
+  (= :table (type x)))
+
+(fn stdlib.list? [x]
+  "Returns true if the given value is a list, false otherwise.
+  Arguments:
+  * `x`: a value
+
+  Example:
+  ```fennel
+  (assert (= (list? [10 20 30]) true))
+  (assert (= (list? \"hello world\") false))
+  ```"
+  (= :list (type x)))
+
 (fn stdlib.fn? [x]
   "Returns true if the given value is a function, false otherwise.
   Arguments:

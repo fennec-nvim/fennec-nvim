@@ -1,4 +1,5 @@
 (import-macros {: set! : vlua : autocmd! : packadd!} :macros)
+(local {: contains? : str? : table?} (require :core.lib))
 (local {: setup} (require :core.lib.setup))
 (local {: autoload} (require :core.lib.autoload))
 (local {: blend-hex} (require :core.lib.color))
@@ -7,7 +8,6 @@
 
 (local base00 "#161616")
 (local base06 "#ffffff")
-
 (local colors {: base00
                :base01 (blend-hex base00 base06 0.085)
                :base02 (blend-hex base00 base06 0.18)
@@ -27,6 +27,22 @@
                :blend "#131313"
                :none :NONE})
 
+;; TODO: fix flicker when opening Telescope buffers
+
+(fn buf-filetype? [filetypes]
+  (assert (or (table? filetypes) (str? filetypes))
+          "Argument to function `buf-filetype?` must be a list or a string.")
+  (if (table? filetypes) (contains? filetypes vim.bo.filetype)
+      (str? filetypes) (contains? [filetypes] vim.bo.filetype)))
+
+(fn buf-new-file? []
+  (local filename (vim.fn.expand "%"))
+  (and (not= filename "") (= vim.bo.buftype "")
+       (= (vim.fn.filereadable filename) 0)))
+
+(fn buf-unnamed? []
+  (= (vim.fn.expand "%") ""))
+
 (local components {})
 (tset components :gutter {1 (fn []
                               git-icons.gutter)
@@ -34,16 +50,34 @@
                           :color {:fg (. colors :base12)}
                           :cond nil})
 
-(tset components :mode {1 (fn []
-                            (.. " " modeline-icons.evil " "))
-                        :padding {:left 0 :right 0}
-                        :color []
-                        :cond nil})
+(tset components :mode
+      {1 (fn []
+           (.. " " modeline-icons.evil " "))
+       :padding {:left 0 :right 0}
+       :color []
+       :cond #(not (buf-filetype? :alpha))})
+
+(tset components :search-count
+      {1 (fn []
+           (when (= vim.v.hlsearch 0)
+             (lua "return \"\""))
+           (local (ok count) (pcall vim.fn.searchcount {:recompute true}))
+           (when (or (or (not ok) (= count.current nil)) (= count.total 0))
+             (lua "return \"0/0\""))
+           (when (= count.incomplete 1)
+             (lua "return \"?/?\""))
+           (local too-many (: ">%d" :format count.maxcount))
+           (local total (or (and (> count.total count.maxcount) too-many)
+                            count.total))
+           (: "%s/%s" :format count.current total))
+       :color {:fg (. colors :base00) :bg (. colors :base08)}
+       :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :buf-size
       {1 (fn []
            (filesize (. (vim.fn.wordcount) :bytes) {:round 1}))
-       :color {:fg (. colors :base06)}})
+       :color {:fg (. colors :base06)}
+       :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :buf-modified
       {1 (fn []
@@ -51,16 +85,23 @@
            (var mod "")
            (when vim.bo.modified
              (set fg (. colors :base10))
-             (set mod ""))
+             (set mod modeline-icons.save))
            (when (not vim.bo.modifiable)
              (set fg (. colors :base10))
-             (set mod ""))
+             (set mod modeline-icons.lock))
+           (when (buf-new-file?)
+             (set fg (. colors :base07))
+             (set mod modeline-icons.new-file))
+           (when (buf-unnamed?)
+             (set fg (. colors :base07))
+             (set mod modeline-icons.checkbox-blank))
+           (when (buf-filetype? :alpha)
+             (set fg (. colors :base12))
+             (set mod modeline-icons.evil))
            (vim.cmd (.. "hi! lualine_filename_status gui=bold guifg=" fg))
            mod)
        :color :lualine_filename_status
-       :cond (fn []
-               (when (not= vim.bo.filetype :TelescopePrompt)
-                 true))})
+       :cond #(not (buf-filetype? :TelescopePrompt))})
 
 (tset components :dir {1 (fn []
                            (.. (vim.fn.expand "%:p:h:t") "/"))
@@ -68,6 +109,9 @@
                        :color :lualine_filename_status})
 
 (tset components :filename {1 :filename
+                            :fmt (fn [filename context]
+                                   (if (buf-unnamed?) "" filename))
+                            :file_status false
                             :color {:gui :bold}
                             :cond nil
                             :padding {:left 0 :right 0}
@@ -100,92 +144,85 @@
                  :info (.. diagnostic-icons.bold-info " ")
                  :hint (.. diagnostic-icons.bold-hint " ")}})
 
-(tset components :lsp {1 (fn [msg]
-                           (var msg (or msg "LS Inactive"))
-                           (local buf-clients (vim.lsp.buf_get_clients))
-                           (if (= (next buf-clients) nil)
-                               (when (or (= (type msg) :boolean) (= #msg 0))
-                                 "LS Inactive")
-                               msg)
-                           (local buf-ft vim.bo.filetype)
-                           (local buf-client-names {})
-                           (each [_ client (pairs buf-clients)]
-                             (when (and (not= client.name :null-ls)
-                                        (not= client.name :copilot))
-                               (table.insert buf-client-names client.name)))
-                           ;; TODO: docstring for list-registered-providers-names
-                           (lambda list-registered-providers-names [filetype]
-                             "Doc string for list-registered-providers-names."
-                             (local s (require :null-ls.sources))
-                             (local available-sources
-                                    (s.get_available filetype))
-                             (local registered {})
-                             (each [_ source (ipairs available-sources)]
-                               (each [method (pairs source.methods)]
-                                 (tset registered method
-                                       (or (. registered method) {}))
-                                 (table.insert (. registered method)
-                                               source.name)))
-                             registered)
-                           ;; TODO: docstring for list-registered
-                           (lambda list-registered [filetype method]
-                             (local registered-providers
-                                    (list-registered-providers-names filetype))
-                             (or (. registered-providers method) {}))
-                           (local supported-formatters
-                                  (list-registered buf-ft :NULL_LS_FORMATTING))
-                           (local supported-linters
-                                  (list-registered buf-ft :NULL_LS_DIAGNOSTICS))
-                           (vim.list_extend buf-client-names
-                                            supported-formatters)
-                           (vim.list_extend buf-client-names supported-linters)
-                           (local uniq-client-names
-                                  (vim.fn.uniq buf-client-names))
-                           (local language-servers
-                                  (.. "[" (table.concat uniq-client-names ", ")
-                                      "]"))
-                           language-servers)
-                       :color {:gui :bold}})
+(tset components :lsp
+      {1 (fn [msg]
+           (var msg (or msg "LS Inactive"))
+           (local buf-clients (vim.lsp.buf_get_clients))
+           (if (= (next buf-clients) nil)
+               (when (or (= (type msg) :boolean) (= #msg 0))
+                 "LS Inactive")
+               msg)
+           (local buf-ft vim.bo.filetype)
+           (local buf-client-names {})
+           (each [_ client (pairs buf-clients)]
+             (when (and (not= client.name :null-ls) (not= client.name :copilot))
+               (table.insert buf-client-names client.name)))
+           ;; TODO: docstring for list-registered-providers-names
+           (lambda list-registered-providers-names [filetype]
+             "Doc string for list-registered-providers-names."
+             (local s (require :null-ls.sources))
+             (local available-sources (s.get_available filetype))
+             (local registered {})
+             (each [_ source (ipairs available-sources)]
+               (each [method (pairs source.methods)]
+                 (tset registered method (or (. registered method) {}))
+                 (table.insert (. registered method) source.name)))
+             registered)
+           ;; TODO: docstring for list-registered
+           (lambda list-registered [filetype method]
+             (local registered-providers
+                    (list-registered-providers-names filetype))
+             (or (. registered-providers method) {}))
+           (local supported-formatters
+                  (list-registered buf-ft :NULL_LS_FORMATTING))
+           (local supported-linters
+                  (list-registered buf-ft :NULL_LS_DIAGNOSTICS))
+           (vim.list_extend buf-client-names supported-formatters)
+           (vim.list_extend buf-client-names supported-linters)
+           (local uniq-client-names (vim.fn.uniq buf-client-names))
+           (local language-servers
+                  (.. "[" (table.concat uniq-client-names ", ") "]"))
+           language-servers)
+       :color {:gui :bold}
+       :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :spaces
       {1 (fn []
            (local shiftwidth (vim.api.nvim_buf_get_option 0 :shiftwidth))
            (.. modeline-icons.tab " " shiftwidth))})
 
-(tset components :filetype {1 :filetype :cond nil :padding {:left 1 :right 1}})
+(tset components :filetype
+      {1 :filetype
+       :fmt (fn [filetype context]
+              (set context.options.icons_enabled false)
+              (if (buf-filetype? [:alpha])
+                  (do
+                    (set context.options.icons_enabled false)
+                    "fennec v0.0.1-dev")
+                  (do
+                    (set context.options.icons_enabled true)
+                    filetype)))
+       :cond nil
+       :padding {:left 1 :right 1}})
 
-(tset components :location [:location])
+(tset components :location
+      {1 :location :cond #(not (buf-filetype? [:alpha :TelescopePrompt]))})
 
 (tset components :progress {1 :progress
                             :fmt (fn []
                                    "%P")
                             ;; "%P/%L")
+                            :cond #(not (buf-filetype? [:alpha
+                                                        :TelescopePrompt]))
                             :color {}})
 
 (set! laststatus 3)
 (set! cmdheight 0)
 
-;; lualine_a
-;; [git-icons.gutter, mode, buffer size]
-
-;; lualine_b
-;; [save, dir/filename.ext] (dir is normal mode color, filename is fg. when not saved, dir and filename is base10)
-
-;; lualine_c
-;; [buffer position, buffer percentage]
-
-;; lualine_x
-;; [filetype]
-
-;; lualine_y
-;; [branch]
-
-;; lualine_z
-;; diagnostics
-
 (setup :lualine
        {:sections {:lualine_a [components.gutter
                                components.mode
+                               components.search-count
                                components.buf-size]
                    :lualine_b [components.buf-modified
                                components.dir
@@ -217,91 +254,7 @@
 
 ;; modeline
 
-;; (local modes {:n :RW
-;;               :no :RO
-;;               :v "**"
-;;               :V "**"
-;;               "\022" "**"
-;;               :s :S
-;;               :S :SL
-;;               "\019" :SB
-;;               :i "**"
-;;               :ic "**"
-;;               :R :RA
-;;               :Rv :RV
-;;               :c :VIEX
-;;               :cv :VIEX
-;;               :ce :EX
-;;               :r :r
-;;               :rm :r
-;;               :r? :r
-;;               :! "!"
-;;               :t ""})
-
 ;; ;; by default these can be blank:
-
-;; (fn get-filetype []
-;;   (.. "%#NormalNC#" vim.bo.filetype))
-
-;; (fn get-bufnr []
-;;   (.. "%#Comment#" (vim.api.nvim_get_current_buf)))
-
-;; (fn color []
-;;   (let [mode (. (vim.api.nvim_get_mode) :mode)]
-;;     (var mode-color "%#Normal#")
-;;     (if (= mode :n) (set mode-color "%#StatusNormal#")
-;;         (or (= mode :i) (= mode :ic)) (set mode-color "%#StatusInsert#")
-;;         (or (or (= mode :v) (= mode :V)) (= mode "\022"))
-;;         (set mode-color "%#StatusVisual#") (= mode :R)
-;;         (set mode-color "%#StatusReplace#") (= mode :c)
-;;         (set mode-color "%#StatusCommand#") (= mode :t)
-;;         (set mode-color "%#StatusTerminal#"))
-;;     mode-color))
-
-;; (fn get-fileinfo []
-;;   (var filename (or (and (= (vim.fn.expand "%") "") " fennec-nvim v0.0.1-dev")
-;;                     (vim.fn.expand "%:t")))
-;;   (when (not= filename " fennec-nvim ")
-;;     (set filename (.. " " filename " ")))
-;;   (.. "%#Normal#" filename "%#NormalNC#"))
-
-;; ;; but overwrite them with conditional features if enabled
-
-;; (fn get-git-status []
-;;   (let [branch (or vim.b.gitsigns_status_dict {:head ""})
-;;         is-head-empty (not= branch.head "")]
-;;     (or (and is-head-empty (string.format "(λ • #%s) " (or branch.head "")))
-;;         "")))
-
-;; ;; get the number of entries of certain severity
-
-;; (fn get-lsp-diagnostic [])
-;; (when (not (rawget vim :lsp))
-;;   (lua "return \"\""))
-
-;; (fn get-severity [s]
-;;   (length (vim.diagnostic.get 0 {:severity s})))
-
-;; (local result
-;;        {:errors (get-severity vim.diagnostic.severity.ERROR)
-;;         :warnings (get-severity vim.diagnostic.severity.WARN)
-;;         :info (get-severity vim.diagnostic.severity.INFO)
-;;         :hints (get-severity vim.diagnostic.severity.HINT)})
-
-;; (string.format " %%#StatusLineDiagnosticWarn#%s %%#StatusLineDiagnosticError#%s "
-;;                (or (. result :warnings) 0) (or (. result :errors) 0))
-
-;; (fn get-searchcount []
-;;   (when (= vim.v.hlsearch 0)
-;;     (lua "return \"%#Normal# %l:%c \""))
-;;   (local (ok count) (pcall vim.fn.searchcount {:recompute true}))
-;;   (when (or (or (not ok) (= count.current nil)) (= count.total 0))
-;;     (lua "return \"\""))
-;;   (when (= count.incomplete 1)
-;;     (lua "return \"?/?\""))
-;;   (local too-many (: ">%d" :format count.maxcount))
-;;   (local total (or (and (> count.total count.maxcount) too-many) count.total))
-;;   (.. "%#Normal#" (: " %s matches " :format total)))
 
 ;; (global Statusline {})
 ;; (set Statusline.statusline

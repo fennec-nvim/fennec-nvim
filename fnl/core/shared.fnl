@@ -16,7 +16,14 @@
                   :branch ""
                   :gutter "▎"})
 
-(local modeline-icons {:mode "" :evil "" :tab ""})
+(local modeline-icons {:mode ""
+                       :evil ""
+                       :tab ""
+                       :save ""
+                       :lock ""
+                       :new-file ""
+                       :checkbox-blank ""})
+
 (local userconfigs {})
 
 {: diagnostic-icons : git-icons : modeline-icons : userconfig}

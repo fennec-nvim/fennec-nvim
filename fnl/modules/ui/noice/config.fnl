@@ -3,6 +3,13 @@
 (local {: autoload} (require :core.lib.autoload))
 
 (setup :noice {:health {:checker false}
+               :messages {:enabled true
+                          :view :mini
+                          :view_error :mini
+                          :view_warn :mini
+                          :view_history :messages
+                          ;; :view_search :cmdline}
+                          :view_search false}
                :cmdline {:format {:cmdline {:pattern "^:"
                                             :icon " "
                                             :lang :vim}
