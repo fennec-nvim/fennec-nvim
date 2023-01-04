@@ -1,4 +1,5 @@
 {
+  "Comment.nvim": { "branch": "master", "commit": "7bb563ff2d811a63b207e9de63e3e9c0877cb6d5" },
   "LuaSnip": { "branch": "master", "commit": "5570fd797eae0790affb54ea669a150cad76db5d" },
   "alpha-nvim": { "branch": "main", "commit": "21a0f2520ad3a7c32c0822f943368dc063a569fb" },
   "ccc.nvim": { "branch": "main", "commit": "4ea096a150fe2636782f6f68b97d3cff7ee28b4f" },
@@ -9,6 +10,7 @@
   "cmp-nvim-lsp-signature-help": { "branch": "main", "commit": "d2768cb1b83de649d57d967085fe73c5e01f8fd7" },
   "cmp-path": { "branch": "main", "commit": "91ff86cd9c29299a64f968ebb45846c485725f23" },
   "cmp_luasnip": { "branch": "master", "commit": "18095520391186d634a0045dacaa346291096566" },
+  "comment-box.nvim": { "branch": "main", "commit": "117d55108edf3758da52cf1117584b974f5e76da" },
   "conjure": { "branch": "develop", "commit": "5727d4b8e890355c3ca306837ec6ddc0885f1355" },
   "fidget.nvim": { "branch": "main", "commit": "44585a0c0085765195e6961c15529ba6c5a2a13b" },
   "friendly-snippets": { "branch": "main", "commit": "1a6a02350568d6830bcfa167c72f9b6e75e454ae" },

@@ -58,6 +58,11 @@
 
 ; default
 ; ────────────────────────────────────────────────────────────
+(use-package! :LudoPinelli/comment-box.nvim)
+(use-package! :numToStr/Comment.nvim
+              {:config (fn []
+                         (require :modules.config.comment.config))})
+
 (require :modules.config.default.config)
 
 ; smartparens
