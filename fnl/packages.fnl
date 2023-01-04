@@ -133,7 +133,7 @@
                          (require :modules.tools.mason.config))})
 
 (use-package! :williamboman/mason-lspconfig.nvim)
-(use-package! :j-hui/fidget.nvim)
+(use-package! :smjonas/inc-rename.nvim)
 (use-package! :neovim/nvim-lspconfig
               {:config (fn []
                          (require :modules.tools.lsp.config))

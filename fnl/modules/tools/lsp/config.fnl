@@ -1,11 +1,18 @@
-(import-macros {: fennec-module-p!} :macros)
+(import-macros {: fennec-module-p! : let! : map!} :macros)
 (local {: autoload} (require :core.lib.autoload))
 (local {: deep-merge} (autoload :core.lib.tables))
 (local {: setup} (require :core.lib.setup))
 (local lsp (autoload :lspconfig))
 (local lsp-servers {})
 
-(setup :fidget {})
+;; TODO: figure out why I need to (let mapleader " ") when I've already done it in config.fnl
+(let! mapleader " ")
+
+(setup :inc_rename)
+(map! [n] :<leader>cr
+      (fn []
+        (.. ":IncRename " (vim.fn.expand :<cword>)))
+      {:desc "Rename symbol"})
 
 (set vim.lsp.handlers.textDocument/signatureHelp
      (vim.lsp.with vim.lsp.handlers.signature_help {:border :solid}))
