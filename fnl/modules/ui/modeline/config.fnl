@@ -204,6 +204,7 @@
                     (set context.options.icons_enabled true)
                     filetype)))
        :cond nil
+       ;; :color {:fg (. colors :base14)}
        :padding {:left 1 :right 1}})
 
 (tset components :location
@@ -218,7 +219,25 @@
                             :color {}})
 
 (set! laststatus 3)
-(set! cmdheight 0)
+(set! cmdheight 1)
+
+;; TODO: figure out how to only show visual and visual-block mode
+(tset components :showcmd
+      {1 (. (require :noice) :api :status :command :get)
+       :cond (. (require :noice) :api :status :command :has)
+       :color {:fg (. colors :base14)}})
+
+;; TODO: figure out how to show this on VimEnter or find better integration between lazy and alpha
+(lambda get-startup-time []
+  (let [stats ((. (require :lazy) :stats))
+        ms (/ (math.floor (+ (* stats.startuptime 100) 0.5)) 100)]
+    `,ms))
+
+(tset components :lazy-stats {1 get-startup-time
+                              :fmt (fn [output context]
+                                     (.. " " output :ms))
+                              :cond #(buf-filetype? :alpha)
+                              :color []})
 
 (setup :lualine
        {:sections {:lualine_a [components.gutter
@@ -228,10 +247,13 @@
                    :lualine_b [components.buf-modified
                                components.dir
                                components.filename]
-                   :lualine_c [components.location components.progress]
-                   :lualine_x [components.lsp components.filetype]
-                   :lualine_y [components.branch]
-                   :lualine_z [components.diagnostics]}
+                   :lualine_c [components.location
+                               components.progress
+                               components.lazy-stats
+                               components.showcmd]
+                   :lualine_x [components.diagnostics components.lsp]
+                   :lualine_y [components.filetype]
+                   :lualine_z [components.branch]}
         :options {:component_separators {:left "" :right ""}
                   :section_separators {:left "" :right ""}
                   :theme {:normal {:a {:fg colors.base12 :bg colors.blend}

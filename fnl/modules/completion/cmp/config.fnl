@@ -5,6 +5,8 @@
 (local luasnip (autoload :luasnip))
 ;; vim settings
 
+;; TODO: don't show completion in Telescope
+
 (set! completeopt [:menu :menuone :noselect])
 ;; add general cmp sources
 
@@ -13,11 +15,16 @@
 (table.insert cmp-sources {:name :luasnip :group_index 1})
 (table.insert cmp-sources {:name :buffer :group_index 2})
 (table.insert cmp-sources {:name :path :group_index 2})
-(table.insert cmp-sources {:name :path :group_index 2})
 
 (table.insert cmp-sources {:name :conjure :group_index 1})
 (table.insert cmp-sources {:name :nvim_lsp :group_index 1})
 (table.insert cmp-sources {:name :nvim_lsp_signature_help :group_index 1})
+
+(local cmp-source-names {:nvim_lsp "(LSP)"
+                         :conjure "(Conjure)"
+                         :buffer "(Buffer)"
+                         :path "(Path)"
+                         :luasnip "(Snippet)"})
 
 ;; lsp icons
 
@@ -66,6 +73,7 @@
              :enabled (fn []
                         (local context (autoload :cmp.config.context))
                         (if (= (. (vim.api.nvim_get_mode) :mode) :c) true
+                            (= :prompt (vim.api.nvim_buf_get_option 0 :buftype)) false
                             (and (not (context.in_treesitter_capture :comment))
                                  (not (context.in_syntax_group :Comment)))))
              :preselect cmp.PreselectMode.None
@@ -106,8 +114,9 @@
                                              [:i :s :c])}
              :sources cmp-sources
              :formatting {:fields {1 :kind 2 :abbr 3 :menu}
-                          :format (fn [_ vim-item]
-                                    (set vim-item.menu vim-item.kind)
+                          :format (fn [entry vim-item]
+                                    (set vim-item.menu
+                                         (. cmp-source-names entry.source.name))
                                     (set vim-item.kind (. icons vim-item.kind))
                                     vim-item)}})
 

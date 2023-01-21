@@ -1,3 +1,3 @@
 (import-macros {: fennec-module!} :macros)
 
-;; (fennec-module! tools.antifennel)
+(fennec-module! tools.antifennel)

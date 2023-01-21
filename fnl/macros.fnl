@@ -160,7 +160,7 @@
 (lambda custom-set-face! [name attributes colors]
   "Sets a highlight group globally using the vim.api.nvim_set_hl API.
   Accepts the following arguments:
-  name -> a symbol.
+  name -> a string.
   attributes -> a list of boolean attributes:
     - bold
     - italic
@@ -188,11 +188,11 @@
   (vim.api.nvim_set_hl 0 \"Error\" {:fg \"#ff0000\"
                                     :bold true})
   ```"
-  (assert-compile (sym? name) "expected symbol for name" name)
-  (assert-compile (tbl? attributes) "expected table for attributes" attributes)
-  (assert-compile (tbl? colors) "expected colors for colors" colors)
-  (let [name (->str name)
-        definition (collect [_ attr (ipairs attributes) :into colors]
+  (assert-compile (str? name) "expected string for name" name)
+  (assert-compile (table? attributes) "expected table for attributes"
+                  attributes)
+  (assert-compile (table? colors) "expected colors for colors" colors)
+  (let [definition (collect [_ attr (ipairs attributes) &into colors]
                      (->str attr)
                      true)]
     `(vim.api.nvim_set_hl 0 ,name ,definition)))
@@ -604,7 +604,10 @@
                                 (view rhs))))
                     options)
         rhs (if (quoted? rhs) (quoted->fn rhs) rhs)]
-    `(vim.keymap.set ,modes ,lhs ,rhs ,options)))
+    `((. (require :legendary) :keymap) {1 ,lhs
+                                        2 ,rhs
+                                        :mode ,modes
+                                        :opts ,options})))
 
 (lambda buf-map! [[modes] lhs rhs ?options]
   "Add a new mapping using the vim.keymap.set API.
@@ -849,6 +852,8 @@
     `,module-length))
 
 {: contains?
+ : any?
+ : str?
  : empty?
  : bool?
  : second

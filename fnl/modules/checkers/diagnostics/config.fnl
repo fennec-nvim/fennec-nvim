@@ -8,20 +8,22 @@
 (let [{: config : severity} vim.diagnostic
       {: sign_define} vim.fn]
   (config {:underline {:severity {:min severity.INFO}}
-           :signs {:severity {:min severity.INFO}}
+           ;; :signs {:severity {:min severity.INFO}}
+           :signs false
            ;; lsp_lines handles this
            :virtual_text false
            :update_in_insert true
            :severity_sort true
            :float {:show_header false :border :rounded}})
   (sign_define :DiagnosticSignError
-               {:text (. diagnostic-icons 1) :texthl :DiagnosticSignError})
+               {:text diagnostic-icons.bold-error :texthl :DiagnosticSignError})
   (sign_define :DiagnosticSignWarn
-               {:text (. diagnostic-icons 2) :texthl :DiagnosticSignWarn})
+               {:text diagnostic-icons.bold-warning
+                :texthl :DiagnosticSignWarn})
   (sign_define :DiagnosticSignInfo
-               {:text (. diagnostic-icons 3) :texthl :DiagnosticSignInfo})
+               {:text diagnostic-icons.bold-info :texthl :DiagnosticSignInfo})
   (sign_define :DiagnosticSignHint
-               {:text (. diagnostic-icons 4) :texthl :DiagnosticSignHint}))
+               {:text diagnostic-icons.bold-hint :texthl :DiagnosticSignHint}))
 
 (local {:open_float open-line-diag-float!
         :goto_prev goto-diag-prev!
@@ -30,7 +32,7 @@
 ;; TODO: figure out why I need to (let mapleader " ") when I've already done it in config.fnl
 (let! mapleader " ")
 
-(map! [n] :<leader>d open-line-diag-float! {:desc "Open diagnostics at line"})
+(map! [n] :gl open-line-diag-float! {:desc "Open diagnostics at line"})
 
 (map! [n] "[d" goto-diag-prev! {:desc "Goto previous diagonstics"})
 (map! [n] "]d" goto-diag-next! {:desc "Goto next diagnostics"})

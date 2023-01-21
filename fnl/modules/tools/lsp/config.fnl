@@ -8,11 +8,15 @@
 ;; TODO: figure out why I need to (let mapleader " ") when I've already done it in config.fnl
 (let! mapleader " ")
 
+(setup :scrollbar {:handlers {:handle false}})
+
+(setup :neodev)
+
 (setup :inc_rename)
 (map! [n] :<leader>cr
       (fn []
         (.. ":IncRename " (vim.fn.expand :<cword>)))
-      {:desc "Rename symbol"})
+      {:desc "Rename symbol" :expr true})
 
 (set vim.lsp.handlers.textDocument/signatureHelp
      (vim.lsp.with vim.lsp.handlers.signature_help {:border :solid}))
@@ -62,6 +66,20 @@
       {:settings {:Lua {:diagnostics {:globals [:vim]}
                         :workspace {:library (vim.api.nvim_list_runtime_paths)
                                     :maxPreload 100000}}}})
+
+(tset lsp-servers :tsserver {})
+
+(tset lsp-servers :vimls {})
+
+(local lsp-configs (autoload :lspconfig.configs))
+(tset lsp-servers :fennel-language-server {})
+(tset lsp-configs :fennel-language-server
+      {:default_config {:cmd [:fennel-language-server]
+                        :filetypes [:fennel]
+                        :single_file_support true
+                        :root_dir (lsp.util.root_pattern :fnl)
+                        :settings {:fennel {:workspace {:library (vim.api.nvim_list_runtime_paths)
+                                                        :diagnostics {:globals [:vim]}}}}}})
 
 (let [servers lsp-servers]
   (each [server server_config (pairs servers)]

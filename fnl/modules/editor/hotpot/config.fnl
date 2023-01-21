@@ -33,6 +33,6 @@
           (set reflect-session.mode :compile))
       (reflect.set-mode reflect-session.id reflect-session.mode))))
 
-(map! [v] :<space>mhn `(new-or-attach-reflect) {:desc "New reflect session"})
+(map! [v] :<leader>mhn `(new-or-attach-reflect) {:desc "New reflect session"})
 
-(map! [n] :<space>mhx `(swap-reflect-mode) {:desc "Swap reflect mode"})
+(map! [n] :<leader>mhx `(swap-reflect-mode) {:desc "Swap reflect mode"})

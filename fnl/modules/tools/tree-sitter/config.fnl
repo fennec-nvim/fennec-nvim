@@ -27,6 +27,11 @@
 (table.insert treesitter-filetypes :gitcommit)
 (table.insert treesitter-filetypes :gitignore)
 
+;; (table.insert treesitter-filetypes :tsx)
+;; (table.insert treesitter-filetypes :typescript)
+;; (table.insert treesitter-filetypes :javascript)
+;; (table.insert treesitter-filetypes :json)
+
 ; the usual
 
 (setup :nvim-treesitter.configs
@@ -35,8 +40,10 @@
         :sync_install true
         :highlight {:enable true :use_languagetree true}
         :indent {:enable true}
+        :context_commentstring {:enable true :enable_autocmd true}
         :rainbow {:enable true
                   :extended_mode true
+                  :disable [:jsx :tsx]
                   :colors ["#878d96"
                            "#a8a8a8"
                            "#8d8d8d"
@@ -66,3 +73,5 @@
                                                    "[[" "@class.outer"}
                              :goto_previous_end {"[M" "@function.outer"
                                                  "[]" "@class.outer"}}}})
+
+(setup :treesitter-context)

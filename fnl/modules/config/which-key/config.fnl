@@ -14,6 +14,8 @@
                  :width {:min 20 :max 50}
                  :spacing 3
                  :align :left}
+        :show_help false
+        :show_keys true
         :hidden [:<silent> :<cmd> :<Cmd> :<CR> :call :lua "^:" "^ "]
         :triggers_blacklist {:i [:j :k] :v [:j :k]}
         :key_labels {:<space> :<SPC> :<tab> :<TAB>}})
@@ -25,11 +27,11 @@
 (register {:<leader>b {:name :+buffers}})
 (register {:<leader>c {:name :+code}})
 (register {:<leader>C {:name :+comment}})
-(register {:<leader>c {:name :+LSP}})
+(register {:<leader>c {:name :+code}})
 (register {:<leader>f {:name :+file}})
 (register {:<leader>g {:name :+git}})
 (register {:<leader>h {:name :+help}})
-(register {:<leader>hn {:name :+nyoom}})
+(register {:<leader>hn {:name :+fennec}})
 (register {:<leader>i {:name :+insert}})
 (register {:<leader>n {:name :+notes}})
 (register {:<leader>o {:name :+open}})

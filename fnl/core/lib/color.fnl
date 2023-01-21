@@ -337,6 +337,27 @@
       (tset base16-palette name hex))
     base16-palette))
 
+(local base00 "#161616")
+(local base06 "#ffffff")
+(local colors {: base00
+               :base01 (blend-hex base00 base06 0.085)
+               :base02 (blend-hex base00 base06 0.18)
+               :base03 (blend-hex base00 base06 0.3)
+               :base04 (blend-hex base00 base06 0.82)
+               :base05 (blend-hex base00 base06 0.95)
+               : base06
+               :base07 "#08bdba"
+               :base08 "#3ddbd9"
+               :base09 "#78a9ff"
+               :base10 "#ee5396"
+               :base11 "#33b1ff"
+               :base12 "#ff7eb6"
+               :base13 "#42be65"
+               :base14 "#be95ff"
+               :base15 "#82cfff"
+               :blend "#131313"
+               :none :NONE})
+
 {: blend-hex
  : lighten-hex
  : darken-hex
@@ -345,4 +366,5 @@
  : rotate-hex
  : gradient
  : gradient-n
- : generate-pallete}
+ : generate-pallete
+ : colors}

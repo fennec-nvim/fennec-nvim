@@ -1,32 +1,28 @@
 (import-macros {: fennec-package-count! : fennec-module-count!} :macros)
 (local {: setup} (require :core.lib.setup))
+(local {: autoload} (require :core.lib.autoload))
 
-(local package-counter (fennec-package-count!))
-(local module-counter (fennec-module-count!))
+(local lazy (autoload :lazy))
 
-(local startup-file :/tmp/nvim-startuptime)
-(local startup-time-pattern "([%d.]+)  [%d.]+: [-]+ NVIM STARTED [-]+")
-(local startup-time-file (or (and (io.open startup-file)
-                                  (: (io.open startup-file) :read :*a))
-                             nil))
+;; TODO: better integration for startup-time and package-counter with lazy and alpha
+;; only calculate startup-time after LazyVimStarted event 
+(fn get-startup-time []
+  (let [stats (lazy.stats)
+        ms (/ (math.floor (+ (* stats.startuptime 100) 0.5)) 100)]
+    `,ms))
 
-(local startup-time (or (and startup-time-file
-                             (tonumber (startup-time-file:match startup-time-pattern)))
-                        nil))
+(fn get-package-count []
+  (let [stats (lazy.stats)
+        loaded stats.loaded]
+    `,loaded))
 
-(var text "")
-(if (and startup-time (>= startup-time 1000))
-    (set text (string.format "Fennec loaded %d packages across %d modules in %.1fs"
-                             package-counter module-counter
-                             (* startup-time 0.001)))
-    startup-time
-    (set text (string.format "Fennec loaded %d packages across %d modules in %.1fms"
-                             package-counter module-counter
-                             (truncate startup-time 3)))
-    (set text (string.format "Fennec loaded %d packages across %d modules"
-                             package-counter module-counter)))
+(local package-count (get-package-count))
+(local startup-time (get-startup-time))
+(local module-count 0)
 
-(: (io.open startup-file :w) :close)
+(var footer-text
+     (string.format "Fennec loaded %d packages across %d modules in  %dms"
+                    package-count module-count startup-time))
 
 ;; setup alpha
 
@@ -37,8 +33,8 @@
               :cursor 5
               :width 50
               :align_shortcut :right
-              :hl :helpSpecial
-              :hl_shortcut :String}]
+              :hl :DashboardCenter
+              :hl_shortcut :DashboardShortCut}]
     (when keybind
       (set opts.keymap
            [:n sc- keybind {:noremap true :silent true :nowait true}]))
@@ -71,24 +67,25 @@
                        "=='   \\/                                    N E O V I M                                   \\/   `=="
                        "\\   _-'                                                                                    `-_   /"
                        " `''                                                                                          ``' "]
-                 :opts {:position :center :hl :Comment}}
+                 :opts {:position :center :hl :DashboardHeader}}
         :buttons {:type :group
-                  :val [(button "SPC q l" "  Reload last session"
+                  :val [(button :L "  Reload last session"
                                 ":Telescope find_files <CR>")
-                        (button "SPC o A" "  Open agenda"
-                                ":Telescope oldfiles<CR>")
+                        (button :A "  Open agenda" ":Telescope oldfiles<CR>")
                         (button :r "  Recently opened files"
                                 ":Telescope oldfiles<CR>")
                         (button :p "  Open project" ":Telescope project<CR>")
-                        (button "SPC RET" "  Jump to bookmark"
+                        (button :RET "  Jump to bookmark"
                                 ":Telescope marks<CR>")
-                        (button "SPC f P" "  Open private configuration"
+                        (button :P "  Open private configuration"
                                 ":Telescope keymaps<CR>")
-                        ;; (button "SPC h d h" "  Open documentation"
-                        ;;         ":Telescope keymaps<CR>")
+                        (button :h "  Open documentation"
+                                ":Telescope keymaps<CR>")
                         (button :q "  Quit" ":qa!<CR>")]
                   :opts {:spacing 1}}
-        :footer {:type :text :val text :opts {:position :center :hl :Comment}}
+        :footer {:type :text
+                 :val footer-text
+                 :opts {:position :center :hl :DashboardFooter}}
         :icon {:type :button
                :val "ﯙ"
                :opts {:position :center :hl :Decorator}

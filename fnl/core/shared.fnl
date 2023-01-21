@@ -14,7 +14,10 @@
                   :bold-modified ""
                   :bold-removed ""
                   :branch ""
-                  :gutter "▎"})
+                  :gutter-removed "契"
+                  :gutter-top-removed ""
+                  ;; :gutter "▎"
+                  :gutter "▍"})
 
 (local modeline-icons {:mode ""
                        :evil ""

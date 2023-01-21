@@ -1,10 +1,10 @@
-(import-macros {: map! : let!} :macros)
+(import-macros {: set! : augroup! : autocmd! : clear! : map! : let!} :macros)
 (local {: setup} (require :core.lib.setup))
+
+(setup :comment-box)
 
 ;; TODO: figure out why I need to (let mapleader " ") when I've already done it in config.fnl
 (let! mapleader " ")
-
-(setup :comment-box)
 
 (map! [nv] :<leader>Cj :<cmd>CBlbox<cr> {:desc "Comment left aligned box"})
 (map! [nv] :<leader>CJ :<cmd>CBalbox<cr>

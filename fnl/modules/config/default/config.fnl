@@ -1,4 +1,5 @@
-(import-macros {: set! : augroup! : autocmd! : clear!} :macros)
+(import-macros {: set! : augroup! : autocmd! : clear! : map! : let!} :macros)
+(local {: setup} (require :core.lib.setup))
 
 (fn bufexists? [...]
   (= (vim.fn.bufexists ...) 1))
